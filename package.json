@@ -1,0 +1,19 @@
+{
+  "name": "splab-slack-bot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon ./src/app.ts"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.12.2",
+    "dotenv": "^16.0.3"
+  },
+  "devDependencies": {
+    "@types/dotenv": "^8.2.0",
+    "@types/node": "^18.15.11",
+    "nodemon": "^2.0.22",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.3"
+  }
+}
