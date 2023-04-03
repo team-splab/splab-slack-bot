@@ -10,7 +10,6 @@ const menuNotificationService = new MenuNotificationService(MENU_CHANNEL_ID);
 
 app.event('app_mention', async ({ event, say }) => {
   await say(`Hey there <@${event.user}>!`);
-  await menuNotificationService.sendMenuNotification();
 });
 
 cron.schedule('30-30 11-13 * * MON-FRI', async () => {
