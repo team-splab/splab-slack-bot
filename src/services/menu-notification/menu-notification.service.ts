@@ -6,17 +6,22 @@ import { Menu } from './menu';
 import { getTodayString } from '../../utils/date';
 
 export class MenuNotificationService {
+  private readonly channelId: string;
+
   private lastSentTs: string | undefined;
   private lastSentDateString: string | undefined;
+
+  constructor(channelId: string) {
+    this.channelId = channelId;
+  }
 
   public async sendMenuNotification(): Promise<void> {
     const greeatMenuRepository = new GreeatMenuRepository();
     const menus = await greeatMenuRepository.fetchMenus();
-    await this.postOrUpdateMenuNotificationToChannel(TEST_CHANNEL_ID, menus);
+    await this.postOrUpdateMenuNotificationToChannel(menus);
   }
 
   private async postOrUpdateMenuNotificationToChannel(
-    channelId: string,
     menus: Menu[]
   ): Promise<void> {
     const today = new Date();
@@ -28,7 +33,7 @@ export class MenuNotificationService {
     const todayString = getTodayString();
     if (this.lastSentTs && this.lastSentDateString === todayString) {
       const result = await app.client.chat.update({
-        channel: channelId,
+        channel: this.channelId,
         ts: this.lastSentTs,
         text: title,
         blocks: blocks,
@@ -37,7 +42,7 @@ export class MenuNotificationService {
       console.log(`${new Date()} - Menu notification updated`);
     } else {
       const result = await app.client.chat.postMessage({
-        channel: channelId,
+        channel: this.channelId,
         text: title,
         blocks: blocks,
       });
