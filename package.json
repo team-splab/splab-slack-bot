@@ -2,7 +2,10 @@
   "name": "splab-slack-bot",
   "version": "1.0.0",
   "main": "index.ts",
+  "license": "MIT",
   "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/index.js",
     "dev": "nodemon ./src/index.ts"
   },
   "dependencies": {

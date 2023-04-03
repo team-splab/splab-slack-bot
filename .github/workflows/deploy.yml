@@ -20,5 +20,6 @@ jobs:
         with:
           node-version: 18
       - run: yarn install --frozen-lockfile
+      - run: yarn build
       - run: pm2 kill
-      - run: pm2 start yarn --interpreter bash --name "splab-slack-bot" -- dev
+      - run: pm2 start ./dist/index.js --name "splab-slack-bot"
