@@ -32,3 +32,4 @@ jobs:
         run: |
           pm2 kill
           pm2 start npm --name "splab-slack-bot" -- start
+          pm2 list
