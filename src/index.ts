@@ -4,8 +4,9 @@ import { MenuNotificationService } from './services/menu-notification/menu-notif
 
 dotenv.config();
 
+const menuNotificationService = new MenuNotificationService();
 app.event('app_mention', async ({ event, say }) => {
-  new MenuNotificationService().sendMenuNotification();
+  menuNotificationService.sendMenuNotification();
   await say(`Hey there <@${event.user}>!`);
 });
 

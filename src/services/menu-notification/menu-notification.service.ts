@@ -1,96 +1,123 @@
+import { Block, KnownBlock } from '@slack/bolt';
 import { app } from '../../app';
 import { DAYS_KOREAN, TEST_CHANNEL_ID } from '../../utils/consts';
 import { GreeatMenuRepository } from './greeat-menu.repository';
 import { Menu } from './menu';
+import { getTodayString } from '../../utils/date';
 
 export class MenuNotificationService {
+  private lastSentTs: string | undefined;
+  private lastSentDateString: string | undefined;
+
   public async sendMenuNotification(): Promise<void> {
     const greeatMenuRepository = new GreeatMenuRepository();
     const menus = await greeatMenuRepository.fetchMenus();
-    await this.sendMenuNotificationToChannel(TEST_CHANNEL_ID, menus);
+    await this.postOrUpdateMenuNotificationToChannel(TEST_CHANNEL_ID, menus);
   }
 
-  private async sendMenuNotificationToChannel(
+  private async postOrUpdateMenuNotificationToChannel(
     channelId: string,
     menus: Menu[]
   ): Promise<void> {
-    await app.client.chat.postMessage({
-      channel: channelId,
-      blocks: [
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: `${new Date().getMonth() + 1}/${new Date().getDate()} (${
-              DAYS_KOREAN[new Date().getDay()]
-            }) 오늘의 메뉴`,
-            emoji: true,
-          },
-        },
+    const today = new Date();
+    const title = `${today.getMonth() + 1}/${today.getDate()} (${
+      DAYS_KOREAN[today.getDay()]
+    }) 오늘의 메뉴`;
+    const blocks = this.buildBlocks(title, menus);
 
-        ...menus
-          .map((menu) => {
-            const { maxQuantity, currentQuantity } = menu;
-            let remainingText: string;
-            if (maxQuantity >= currentQuantity) {
-              remainingText = `*${
-                menu.maxQuantity - menu.currentQuantity
-              }* 인분 남음`;
-            } else {
-              remainingText = `*${
-                menu.currentQuantity - menu.maxQuantity
-              }* 인분 초과 판매 중`;
-            }
-            return [
-              {
-                type: 'divider',
-              },
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText}\n${menu.kcal}kcal`,
-                },
-                accessory: {
-                  type: 'image',
-                  image_url: menu.imageUrl,
-                  alt_text: menu.name,
-                },
-              },
-              {
-                type: 'section',
-                text: {
-                  type: 'mrkdwn',
-                  text: ' ',
-                },
-                accessory: {
-                  type: 'button',
-                  text: {
-                    type: 'plain_text',
-                    text: '사진 크게 보기',
-                    emoji: true,
-                  },
-                  value: 'click_me_123',
-                  url: menu.imageUrl,
-                  action_id: 'button-action',
-                },
-              },
-            ];
-          })
-          .flat(),
-        {
-          type: 'divider',
+    const todayString = getTodayString();
+    if (this.lastSentTs && this.lastSentDateString === todayString) {
+      const result = await app.client.chat.update({
+        channel: channelId,
+        ts: this.lastSentTs,
+        text: title,
+        blocks: blocks,
+      });
+      this.lastSentTs = result.ts;
+    } else {
+      const result = await app.client.chat.postMessage({
+        channel: channelId,
+        text: title,
+        blocks: blocks,
+      });
+      this.lastSentTs = result.ts;
+    }
+    this.lastSentDateString = todayString;
+  }
+
+  private buildBlocks(title: string, menus: Menu[]): (KnownBlock | Block)[] {
+    return [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: title,
+          emoji: true,
         },
-        {
-          type: 'context',
-          elements: [
+      },
+
+      ...menus
+        .map((menu) => {
+          const { maxQuantity, currentQuantity } = menu;
+          let remainingText: string;
+          if (maxQuantity >= currentQuantity) {
+            remainingText = `*${
+              menu.maxQuantity - menu.currentQuantity
+            }* 인분 남음`;
+          } else {
+            remainingText = `*${
+              menu.currentQuantity - menu.maxQuantity
+            }* 인분 초과 판매 중`;
+          }
+          return [
             {
-              type: 'mrkdwn',
-              text: `마지막 업데이트: ${new Date().toLocaleString()}`,
+              type: 'divider',
             },
-          ],
-        },
-      ],
-    });
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText}\n${menu.kcal}kcal`,
+              },
+              accessory: {
+                type: 'image',
+                image_url: menu.imageUrl,
+                alt_text: menu.name,
+              },
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: ' ',
+              },
+              accessory: {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: '사진 크게 보기',
+                  emoji: true,
+                },
+                value: 'click_me_123',
+                url: menu.imageUrl,
+                action_id: 'button-action',
+              },
+            },
+          ];
+        })
+        .flat(),
+      {
+        type: 'divider',
+      },
+      {
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: `마지막 업데이트: ${new Date().toLocaleString()}`,
+          },
+        ],
+      },
+    ];
   }
 }

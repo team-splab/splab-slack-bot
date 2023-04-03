@@ -1,12 +1,13 @@
 import axios from 'axios';
 import { Menu } from './menu';
+import { getTodayString } from '../../utils/date';
 
 export class GreeatMenuRepository {
   private API_MEALS_URL = 'https://api-greeat.52g.gs/meals';
   private API_STATUS_URL = 'https://api-greeat.52g.gs/status/date';
 
   public async fetchMenus(): Promise<Menu[]> {
-    const todayString = this.getTodayString();
+    const todayString = getTodayString();
     const [mealsResponse, statusResponse] = await Promise.all([
       axios.get(`${this.API_MEALS_URL}/${todayString}`),
       axios.get(`${this.API_STATUS_URL}/${todayString}`),
@@ -43,12 +44,5 @@ export class GreeatMenuRepository {
         category: mealsData.group_of_e,
       },
     ];
-  }
-
-  private getTodayString(): string {
-    const today = new Date();
-    const monthString = (today.getMonth() + 1).toString().padStart(2, '0');
-    const dateString = today.getDate().toString().padStart(2, '0');
-    return `${today.getFullYear()}${monthString}${dateString}`;
   }
 }
