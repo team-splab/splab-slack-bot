@@ -19,7 +19,16 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - run: yarn install --frozen-lockfile
-      - run: yarn build
-      - run: pm2 kill
-      - run: pm2 start ./dist/index.js --name "splab-slack-bot"
+      - name: Create .env file
+        run: |
+          touch .env
+          echo SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} >> .env
+          echo SLACK_APP_TOKEN=${{ secrets.SLACK_APP_TOKEN }} >> .env
+      - name: Install packages
+        run: yarn install --frozen-lockfile
+      - name: Build
+        run: yarn build
+      - name: Start running
+        run: |
+          pm2 kill
+          pm2 start ./dist/index.js --name "splab-slack-bot"
