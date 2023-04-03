@@ -34,6 +34,7 @@ export class MenuNotificationService {
         blocks: blocks,
       });
       this.lastSentTs = result.ts;
+      console.log(`${new Date()} - Menu notification updated`);
     } else {
       const result = await app.client.chat.postMessage({
         channel: channelId,
@@ -41,6 +42,7 @@ export class MenuNotificationService {
         blocks: blocks,
       });
       this.lastSentTs = result.ts;
+      console.log(`${new Date()} - Menu notification posted`);
     }
     this.lastSentDateString = todayString;
   }

@@ -1,13 +1,19 @@
 import dotenv from 'dotenv';
 import { app } from './app';
 import { MenuNotificationService } from './services/menu-notification/menu-notification.service';
+import * as cron from 'node-cron';
 
 dotenv.config();
 
 const menuNotificationService = new MenuNotificationService();
+
 app.event('app_mention', async ({ event, say }) => {
-  menuNotificationService.sendMenuNotification();
   await say(`Hey there <@${event.user}>!`);
+  await menuNotificationService.sendMenuNotification();
+});
+
+cron.schedule('30-30 11-13 * * MON-FRI', async () => {
+  await menuNotificationService.sendMenuNotification();
 });
 
 (async () => {
