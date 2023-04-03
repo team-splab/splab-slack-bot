@@ -31,4 +31,4 @@ jobs:
       - name: Start running
         run: |
           pm2 kill
-          pm2 startpm2 start npm --name "splab-slack-bot -- start"
+          pm2 start npm --name "splab-slack-bot -- start"
