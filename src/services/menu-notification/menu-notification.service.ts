@@ -68,16 +68,14 @@ export class MenuNotificationService {
           const { maxQuantity, currentQuantity } = menu;
           let remainingText: string;
           if (maxQuantity >= currentQuantity) {
-            remainingText = `*${
-              menu.maxQuantity - menu.currentQuantity
-            }* 인분 남음`;
+            remainingText = `*${maxQuantity - currentQuantity}* 인분 남음`;
           } else {
             remainingText = `*${
-              menu.currentQuantity - menu.maxQuantity
+              currentQuantity - maxQuantity
             }* 인분 초과 판매 중`;
           }
           const remainingPercentText = `${Math.round(
-            (menu.currentQuantity / menu.maxQuantity) * 100
+            ((maxQuantity - currentQuantity) / menu.maxQuantity) * 100
           )}%`;
           return [
             {
