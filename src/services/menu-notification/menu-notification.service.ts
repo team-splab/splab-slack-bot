@@ -76,6 +76,9 @@ export class MenuNotificationService {
               menu.currentQuantity - menu.maxQuantity
             }* 인분 초과 판매 중`;
           }
+          const remainingPercentText = `${Math.round(
+            (menu.currentQuantity / menu.maxQuantity) * 100
+          )}%`;
           return [
             {
               type: 'divider',
@@ -84,7 +87,7 @@ export class MenuNotificationService {
               type: 'section',
               text: {
                 type: 'mrkdwn',
-                text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText}\n${menu.kcal}kcal`,
+                text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText} (${remainingPercentText})\n${menu.kcal}kcal`,
               },
               accessory: {
                 type: 'image',
