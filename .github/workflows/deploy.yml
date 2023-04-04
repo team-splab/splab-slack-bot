@@ -13,6 +13,7 @@ jobs:
     env:
       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
       SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+      TZ: Asia/Seoul
 
     steps:
       - uses: actions/checkout@v3
