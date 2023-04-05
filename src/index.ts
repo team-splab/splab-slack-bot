@@ -9,7 +9,7 @@ dotenv.config();
 const menuNotificationService = new MenuNotificationService(MENU_CHANNEL_ID);
 
 app.event('app_mention', async ({ event, say }) => {
-  await say(`Hey there <@${event.user}>!`);
+  await say(`Hey there <@${event.user}>! ${new Date().toLocaleString()}`);
 });
 
 cron.schedule(

@@ -25,6 +25,7 @@ jobs:
           touch .env
           echo SLACK_BOT_TOKEN=${{ secrets.SLACK_BOT_TOKEN }} >> .env
           echo SLACK_APP_TOKEN=${{ secrets.SLACK_APP_TOKEN }} >> .env
+          echo TZ=Asia/Seoul >> .env
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Build

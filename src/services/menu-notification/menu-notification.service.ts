@@ -122,9 +122,7 @@ export class MenuNotificationService {
         elements: [
           {
             type: 'mrkdwn',
-            text: `마지막 업데이트: ${new Date().toLocaleString('ko-KR', {
-              timeZone: 'Asia/Seoul',
-            })}`,
+            text: `마지막 업데이트: ${new Date().toLocaleString()}`,
           },
         ],
       },
