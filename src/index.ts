@@ -13,21 +13,21 @@ app.event('app_mention', async ({ event, say }) => {
 });
 
 cron.schedule(
-  '30-59 11 * * MON-FRI',
+  '30-59/5 11 * * MON-FRI',
   async () => {
     await menuNotificationService.sendMenuNotification();
   },
   { timezone: 'Asia/Seoul' }
 );
 cron.schedule(
-  '* 12 * * MON-FRI',
+  '*/5 12 * * MON-FRI',
   async () => {
     await menuNotificationService.sendMenuNotification();
   },
   { timezone: 'Asia/Seoul' }
 );
 cron.schedule(
-  '0-30 13 * * MON-FRI',
+  '0-30/5 13 * * MON-FRI',
   async () => {
     await menuNotificationService.sendMenuNotification();
   },
