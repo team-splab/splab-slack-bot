@@ -77,7 +77,7 @@ export class MenuNotificationService {
           const remainingPercentText = `${Math.round(
             ((maxQuantity - currentQuantity) / menu.maxQuantity) * 100
           )}%`;
-          return [
+          const blocks: (KnownBlock | Block)[] = [
             {
               type: 'divider',
             },
@@ -87,31 +87,21 @@ export class MenuNotificationService {
                 type: 'mrkdwn',
                 text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText} (${remainingPercentText})\n${menu.kcal}kcal`,
               },
-              accessory: {
-                type: 'image',
-                image_url: menu.imageUrl,
-                alt_text: menu.name,
-              },
-            },
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: ' ',
-              },
-              accessory: {
-                type: 'button',
-                text: {
-                  type: 'plain_text',
-                  text: '사진 크게 보기',
-                  emoji: true,
-                },
-                value: 'click_me_123',
-                url: menu.imageUrl,
-                action_id: 'button-action',
-              },
             },
           ];
+          if (menu.imageUrl) {
+            blocks.push({
+              type: 'image',
+              title: {
+                type: 'plain_text',
+                text: menu.name,
+                emoji: true,
+              },
+              image_url: menu.imageUrl,
+              alt_text: menu.name,
+            });
+          }
+          return blocks;
         })
         .flat(),
       {
@@ -126,6 +116,6 @@ export class MenuNotificationService {
           },
         ],
       },
-    ];
+    ] as (KnownBlock | Block)[];
   }
 }
