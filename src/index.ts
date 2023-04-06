@@ -10,7 +10,7 @@ const menuNotificationService = new MenuNotificationService(MENU_CHANNEL_ID);
 
 app.event('app_mention', async ({ event, say }) => {
   await say(`Hey there <@${event.user}>! ${new Date().toLocaleString()}`);
-  console.log('App mentioned');
+  console.log(`${new Date()} - App mentioned`);
 });
 
 cron.schedule(
