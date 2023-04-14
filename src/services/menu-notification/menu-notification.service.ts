@@ -66,6 +66,7 @@ export class MenuNotificationService {
       ...menus
         .map((menu) => {
           const { maxQuantity, currentQuantity } = menu;
+          const imageUrl = encodeURI(menu.imageUrl);
           let remainingText: string;
           if (maxQuantity >= currentQuantity) {
             remainingText = `*${maxQuantity - currentQuantity}* 인분 남음`;
@@ -97,7 +98,7 @@ export class MenuNotificationService {
                 text: menu.name,
                 emoji: true,
               },
-              image_url: menu.imageUrl,
+              image_url: imageUrl,
               alt_text: menu.name,
             });
           }
