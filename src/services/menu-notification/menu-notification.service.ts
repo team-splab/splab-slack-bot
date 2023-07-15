@@ -1,9 +1,10 @@
 import { Block, KnownBlock } from '@slack/bolt';
 import { app } from '../../app';
-import { DAYS_KOREAN, TEST_CHANNEL_ID } from '../../utils/consts';
+import { ACTIONS, DAYS_KOREAN } from '../../utils/consts';
 import { GreeatMenuRepository } from './greeat-menu.repository';
 import { Menu } from './menu';
 import { getTodayString } from '../../utils/date';
+import { MenuSelectService } from './menu-select.service';
 
 export class MenuNotificationService {
   private readonly channelId: string;
@@ -65,6 +66,9 @@ export class MenuNotificationService {
 
       ...menus
         .map((menu) => {
+          const selectedUserIds =
+            MenuSelectService.menuSelectedUserIds[menu.cornerId] || [];
+
           const { maxQuantity, currentQuantity } = menu;
           const imageUrl = encodeURI(menu.imageUrl);
           let remainingText: string;
@@ -86,7 +90,22 @@ export class MenuNotificationService {
               type: 'section',
               text: {
                 type: 'mrkdwn',
-                text: `*${menu.cornerName}*\n*${menu.name}* (${menu.category})\n${remainingText} (${remainingPercentText})\n${menu.kcal}kcal`,
+                text: `*${menu.cornerName}*  ${selectedUserIds.join(' ')}\n*${
+                  menu.name
+                }* (${
+                  menu.category
+                })\n${remainingText} (${remainingPercentText})\n${
+                  menu.kcal
+                }kcal`,
+              },
+              accessory: {
+                type: 'button',
+                text: {
+                  type: 'plain_text',
+                  text: '선택',
+                },
+                value: menu.cornerId,
+                action_id: ACTIONS.MENU_SELECT,
               },
             },
           ];

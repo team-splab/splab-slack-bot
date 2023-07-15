@@ -1,4 +1,5 @@
 export interface Menu {
+  cornerId: string;
   cornerName: string;
   name: string;
   maxQuantity: number;

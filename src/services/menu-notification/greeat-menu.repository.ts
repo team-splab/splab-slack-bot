@@ -17,6 +17,7 @@ export class GreeatMenuRepository {
 
     return [
       {
+        cornerId: 'G',
         cornerName: ':large_yellow_circle: G',
         name: mealsData.main_of_g,
         maxQuantity: statusData.number_of_meals_by_manager.g,
@@ -26,6 +27,7 @@ export class GreeatMenuRepository {
         category: mealsData.group_of_g,
       },
       {
+        cornerId: 'R',
         cornerName: ':large_orange_circle: R',
         name: mealsData.main_of_r,
         maxQuantity: statusData.number_of_meals_by_manager.r,
@@ -35,6 +37,7 @@ export class GreeatMenuRepository {
         category: mealsData.group_of_r,
       },
       {
+        cornerId: 'E',
         cornerName: ':large_green_circle: E',
         name: mealsData.main_of_e,
         maxQuantity: statusData.number_of_meals_by_manager.e,
