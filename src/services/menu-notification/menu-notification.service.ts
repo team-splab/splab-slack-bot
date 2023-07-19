@@ -42,6 +42,7 @@ export class MenuNotificationService {
       this.lastSentTs = result.ts;
       console.log(`${new Date()} - Menu notification updated`);
     } else {
+      MenuSelectService.menuSelectedUserIds = {};
       const result = await app.client.chat.postMessage({
         channel: this.channelId,
         text: title,
