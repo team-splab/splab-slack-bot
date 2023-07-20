@@ -29,10 +29,14 @@ export class MenuNotificationService {
     const title = `${today.getMonth() + 1}/${today.getDate()} (${
       DAYS_KOREAN[today.getDay()]
     }) 오늘의 메뉴`;
-    const blocks = this.buildBlocks(title, menus);
 
     const todayString = getTodayString();
     if (this.lastSentTs && this.lastSentDateString === todayString) {
+      const blocks = this.buildBlocks(
+        title,
+        menus,
+        MenuSelectService.menuSelectedUserIds
+      );
       const result = await app.client.chat.update({
         channel: this.channelId,
         ts: this.lastSentTs,
@@ -43,6 +47,7 @@ export class MenuNotificationService {
       console.log(`${new Date()} - Menu notification updated`);
     } else {
       MenuSelectService.menuSelectedUserIds = {};
+      const blocks = this.buildBlocks(title, menus, {});
       const result = await app.client.chat.postMessage({
         channel: this.channelId,
         text: title,
@@ -54,7 +59,11 @@ export class MenuNotificationService {
     this.lastSentDateString = todayString;
   }
 
-  private buildBlocks(title: string, menus: Menu[]): (KnownBlock | Block)[] {
+  private buildBlocks(
+    title: string,
+    menus: Menu[],
+    menuSelectedUserIds: typeof MenuSelectService.menuSelectedUserIds
+  ): (KnownBlock | Block)[] {
     return [
       {
         type: 'header',
@@ -67,8 +76,7 @@ export class MenuNotificationService {
 
       ...menus
         .map((menu) => {
-          const selectedUserIds =
-            MenuSelectService.menuSelectedUserIds[menu.cornerId] || [];
+          const selectedUserIds = menuSelectedUserIds[menu.cornerId] || [];
 
           const { maxQuantity, currentQuantity } = menu;
           const imageUrl = encodeURI(menu.imageUrl);
