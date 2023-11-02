@@ -19,7 +19,7 @@ export class DailyReportService {
       );
     }
 
-    axios.post(
+    axios.get(
       `${this.API_ADMIN_SPACE}
       ${command.text.split(' ')[0]}
       ${this.URL_DAILY_REPORT}
