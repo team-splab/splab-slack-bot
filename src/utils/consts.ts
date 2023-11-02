@@ -6,3 +6,7 @@ export const DAYS_KOREAN = ['일', '월', '화', '수', '목', '금', '토'];
 export const ACTIONS = {
   MENU_SELECT: 'menu_select',
 };
+
+export const SPACE = {
+  DAILY_REPORT: '/daily_report',
+};
