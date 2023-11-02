@@ -2,9 +2,6 @@ import axios from 'axios';
 import { SlackCommandMiddlewareArgs } from '@slack/bolt';
 
 export class DailyReportService {
-  private API_ADMIN_SPACE = 'https://api.sendtime.app/v2/admin/space/';
-  private URL_DAILY_REPORT = '/daily';
-
   public async sendDailyReport({
     command,
     ack,
@@ -19,12 +16,13 @@ export class DailyReportService {
       );
     }
 
-    axios.get(
-      `${this.API_ADMIN_SPACE}
-      ${command.text.split(' ')[0]}
-      ${this.URL_DAILY_REPORT}
-      ?email=${command.text.split(' ')[1]}`
-    );
+    const [handle, email] = command.text.split(' ');
+
+    axios.get(`https://api.sendtime.app/v2/admin/space/${handle}/daily`, {
+      params: {
+        email: email,
+      },
+    });
 
     await say(
       `Daily Report sent to <@${command.user_id}>'s email <@${
