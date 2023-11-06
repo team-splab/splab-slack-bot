@@ -7,6 +7,10 @@ export const ACTIONS = {
   MENU_SELECT: 'menu_select',
 };
 
-export const SPACE = {
-  DAILY_REPORT: '/daily_report',
+export const SLASH_COMMANDS = {
+  DAILY_REPORT: command('daily_report'),
 };
+
+function command(command: string) {
+  return `/${process.env.IS_PRODUCTION === 'true' ? '' : 'dev_'}${command}`;
+}
