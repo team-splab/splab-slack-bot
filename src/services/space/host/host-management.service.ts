@@ -9,8 +9,20 @@ export class HostManagementService implements SlashCommandService {
 
   async onSlashCommand({
     logger,
+    client,
+    command,
   }: SlackCommandMiddlewareArgs &
     AllMiddlewareArgs<StringIndexed>): Promise<void> {
-    logger.info('test');
+    client.views.open({
+      trigger_id: command.trigger_id,
+      view: {
+        type: 'modal',
+        title: {
+          type: 'plain_text',
+          text: 'test',
+        },
+        blocks: [],
+      },
+    });
   }
 }
