@@ -37,10 +37,16 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
     .filter((service) => service.slashCommandName === command.command)
     .forEach(async (service) => {
       if (command.text.startsWith(service.slashCommandText)) {
-        await ack();
+        await ack({ response_type: 'in_channel' });
         await service.onSlashCommand(args);
+        return;
       }
     });
+
+  await ack({
+    response_type: 'ephemeral',
+    text: `*${command.command} ${command.text}* 명령어를 찾을 수 없습니다.`,
+  });
 });
 
 ['*/5 9-12 * * MON-FRI', '0-30/5 13 * * MON-FRI'].forEach((cronTime) => {
