@@ -11,15 +11,33 @@ export class HostManagementService implements SlashCommandService {
     logger,
     client,
     command,
+    respond,
   }: SlackCommandMiddlewareArgs &
     AllMiddlewareArgs<StringIndexed>): Promise<void> {
+    const [spaceHandle] = command.text
+      .split(this.slashCommandText)[1]
+      .trim()
+      .split(' ');
+    const spaceHandleWithoutAt = spaceHandle.replace('@', '');
+
+    if (!spaceHandle) {
+      logger.info(`${new Date()} - space handle is not provided`);
+      await respond({
+        response_type: 'ephemeral',
+        text: `Please enter the space handle. ex) \`${this.slashCommandName} ${this.slashCommandText} handle\``,
+        mrkdwn: true,
+      });
+      return;
+    }
+
+    logger.info(`${new Date()} - space handle: ${spaceHandleWithoutAt}`);
     client.views.open({
       trigger_id: command.trigger_id,
       view: {
         type: 'modal',
         title: {
           type: 'plain_text',
-          text: 'Host Management',
+          text: 'Update Space Hosts',
         },
         submit: {
           type: 'plain_text',
@@ -30,6 +48,18 @@ export class HostManagementService implements SlashCommandService {
           text: 'Cancel',
         },
         blocks: [
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*Space* <https://umoh.io/@${spaceHandleWithoutAt}|@${spaceHandleWithoutAt}>`,
+              },
+            ],
+          },
+          {
+            type: 'divider',
+          },
           {
             type: 'input',
             optional: true,
@@ -47,7 +77,7 @@ export class HostManagementService implements SlashCommandService {
               focus_on_load: true,
               placeholder: {
                 type: 'plain_text',
-                text: 'ex) leo@splab.dev, kang@splab.dev, ⋯',
+                text: 'ex) leo@splab.dev, kang@splab.dev, ...',
               },
             },
           },
@@ -68,7 +98,7 @@ export class HostManagementService implements SlashCommandService {
               focus_on_load: false,
               placeholder: {
                 type: 'plain_text',
-                text: 'ex) leo@splab.dev, kang@splab.dev, ⋯',
+                text: 'ex) leo@splab.dev, kang@splab.dev, ...',
               },
             },
           },
