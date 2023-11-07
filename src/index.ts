@@ -6,6 +6,8 @@ import { ACTIONS, MENU_CHANNEL_ID } from './utils/consts';
 import { SLASH_COMMANDS } from './utils/consts';
 import { MenuSelectService } from './services/menu-notification/menu-select.service';
 import { DailyReportService } from './services/space/daily-report/daily-report.service';
+import { HostManagementService } from './services/space/host/host-management.service';
+import { SlashCommandService } from './services/slash-command.service';
 
 dotenv.config();
 
@@ -14,6 +16,9 @@ export const menuNotificationService = new MenuNotificationService(
 );
 const menuSelectService = new MenuSelectService();
 const dailyReportService = new DailyReportService();
+const slashCommandServices: SlashCommandService[] = [
+  new HostManagementService(),
+];
 
 app.event('app_mention', async ({ event, say }) => {
   console.log(`${new Date()} - App mentioned`);
@@ -23,6 +28,20 @@ app.event('app_mention', async ({ event, say }) => {
 app.action(ACTIONS.MENU_SELECT, menuSelectService.onMenuSelectAction);
 
 app.command(SLASH_COMMANDS.DAILY_REPORT, dailyReportService.sendDailyReport);
+
+app.command(SLASH_COMMANDS.UMOH, async (args) => {
+  const { logger, command, ack } = args;
+  logger.info(`${new Date()} - ${command.command} ${command.text}`);
+
+  slashCommandServices
+    .filter((service) => service.slashCommandName === command.command)
+    .forEach(async (service) => {
+      if (command.text.startsWith(service.slashCommandText)) {
+        await ack();
+        await service.onSlashCommand(args);
+      }
+    });
+});
 
 ['*/5 9-12 * * MON-FRI', '0-30/5 13 * * MON-FRI'].forEach((cronTime) => {
   cron.schedule(
