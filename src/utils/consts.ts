@@ -9,7 +9,7 @@ export const ACTIONS = {
 
 export const SLASH_COMMANDS = {
   DAILY_REPORT: command('daily_report'),
-  UMOH: command('우모'),
+  UMOH: command('umoh'),
 };
 
 function command(command: string) {

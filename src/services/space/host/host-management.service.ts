@@ -5,7 +5,7 @@ import { SLASH_COMMANDS } from '../../../utils/consts';
 
 export class HostManagementService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
-  readonly slashCommandText = '스페이스 호스트';
+  readonly slashCommandText = 'space host';
 
   async onSlashCommand({
     logger,
