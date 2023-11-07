@@ -19,9 +19,60 @@ export class HostManagementService implements SlashCommandService {
         type: 'modal',
         title: {
           type: 'plain_text',
-          text: 'test',
+          text: 'Host Management',
         },
-        blocks: [],
+        submit: {
+          type: 'plain_text',
+          text: 'Update',
+        },
+        close: {
+          type: 'plain_text',
+          text: 'Cancel',
+        },
+        blocks: [
+          {
+            type: 'input',
+            optional: true,
+            label: {
+              type: 'plain_text',
+              text: 'Admins',
+            },
+            hint: {
+              type: 'plain_text',
+              text: 'Enter emails separated by commas, whitespaces, or new lines',
+            },
+            element: {
+              type: 'plain_text_input',
+              multiline: true,
+              focus_on_load: true,
+              placeholder: {
+                type: 'plain_text',
+                text: 'ex) leo@splab.dev, kang@splab.dev, ⋯',
+              },
+            },
+          },
+          {
+            type: 'input',
+            optional: true,
+            label: {
+              type: 'plain_text',
+              text: 'Viewers',
+            },
+            hint: {
+              type: 'plain_text',
+              text: 'Enter emails separated by commas, whitespaces, or new lines',
+            },
+            element: {
+              type: 'plain_text_input',
+              multiline: true,
+              focus_on_load: false,
+              placeholder: {
+                type: 'plain_text',
+                text: 'ex) leo@splab.dev, kang@splab.dev, ⋯',
+              },
+            },
+          },
+        ],
       },
     });
   }
