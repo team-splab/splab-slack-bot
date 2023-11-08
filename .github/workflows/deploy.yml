@@ -24,6 +24,7 @@ jobs:
           echo SLACK_APP_TOKEN=${{ secrets.SLACK_APP_TOKEN }} >> .env
           echo IS_PRODUCTION=true >> .env
           echo TZ=Asia/Seoul >> .env
+          echo SENDTIME_API_URL=https://api.sendtime.app >> .env
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Build

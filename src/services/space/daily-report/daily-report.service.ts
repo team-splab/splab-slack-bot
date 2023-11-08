@@ -18,11 +18,14 @@ export class DailyReportService {
 
     const [handle, email] = command.text.split(' ');
 
-    axios.get(`https://api.sendtime.app/v2/admin/space/${handle}/daily`, {
-      params: {
-        email: email,
-      },
-    });
+    axios.get(
+      `${process.env.SENDTIME_API_URL}/v2/admin/space/${handle}/daily`,
+      {
+        params: {
+          email: email,
+        },
+      }
+    );
 
     await say(
       `Daily Report sent to <@${command.user_id}>'s email <@${
