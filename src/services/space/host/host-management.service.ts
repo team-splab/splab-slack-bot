@@ -11,9 +11,8 @@ export class HostManagementService implements SlashCommandService {
     logger,
     client,
     command,
-    respond,
-  }: SlackCommandMiddlewareArgs &
-    AllMiddlewareArgs<StringIndexed>): Promise<void> {
+    ack,
+  }: SlackCommandMiddlewareArgs & AllMiddlewareArgs): Promise<void> {
     const [spaceHandle] = command.text
       .split(this.slashCommandText)[1]
       .trim()
@@ -22,13 +21,15 @@ export class HostManagementService implements SlashCommandService {
 
     if (!spaceHandle) {
       logger.info(`${new Date()} - space handle is not provided`);
-      await respond({
+      await ack({
         response_type: 'ephemeral',
         text: `Please enter the space handle. ex) \`${this.slashCommandName} ${this.slashCommandText} handle\``,
         mrkdwn: true,
       });
       return;
     }
+
+    await ack({ response_type: 'in_channel' });
 
     logger.info(`${new Date()} - space handle: ${spaceHandleWithoutAt}`);
     client.views.open({

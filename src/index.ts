@@ -37,7 +37,6 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
     .filter((service) => service.slashCommandName === command.command)
     .forEach(async (service) => {
       if (command.text.startsWith(service.slashCommandText)) {
-        await ack({ response_type: 'in_channel' });
         await service.onSlashCommand(args);
         return;
       }
@@ -45,7 +44,7 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
 
   await ack({
     response_type: 'ephemeral',
-    text: `*${command.command} ${command.text}* 명령어를 찾을 수 없습니다.`,
+    text: `\`${command.command} ${command.text}\` command is not supported.`,
   });
 });
 
