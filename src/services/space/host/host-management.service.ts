@@ -6,6 +6,14 @@ import {
 import { SlashCommandService } from '../../slash-command.service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
+import { SpaceApi } from '../../../apis/space';
+import { SpaceHost } from '../../../apis/space/types';
+
+interface PrivateMetadata {
+  spaceHandle: string;
+  channel: string;
+  userId: string;
+}
 
 export class HostManagementService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -25,31 +33,66 @@ export class HostManagementService implements SlashCommandService {
     client,
     command,
     ack,
+    ...args
   }: SlackCommandMiddlewareArgs & AllMiddlewareArgs): Promise<void> {
-    const [spaceHandle] = command.text
+    console.log(args, command);
+
+    const spaceHandle = command.text
       .split(this.slashCommandText)[1]
       .trim()
-      .split(' ');
-    const spaceHandleWithoutAt = spaceHandle.replace('@', '');
+      .split(' ')[0]
+      .replace('@', '');
 
     if (!spaceHandle) {
       logger.info(`${new Date()} - space handle is not provided`);
       await ack({
         response_type: 'ephemeral',
         text: `Please enter the space handle. ex) \`${this.slashCommandName} ${this.slashCommandText} handle\``,
-        mrkdwn: true,
       });
       return;
     }
 
+    logger.info(`${new Date()} - space handle: ${spaceHandle}`);
+
+    let hosts: SpaceHost[] = [];
+    try {
+      const {
+        data: {
+          results: [response],
+        },
+      } = await SpaceApi.getHosts(spaceHandle);
+      hosts = response.hosts;
+      logger.info(`${new Date()} - hosts: ${hosts}`);
+    } catch (error) {
+      logger.error(`${new Date()} - error: ${error}`);
+      await ack({
+        response_type: 'ephemeral',
+        text: `Failed to get space hosts. Please check the space handle.`,
+      });
+      return;
+    }
+
+    const admins = hosts
+      .filter((host) => host.accessType === 'ADMIN')
+      .map((host) => host.email)
+      .join(', ');
+    const viewers = hosts
+      .filter((host) => host.accessType === 'VIEWER')
+      .map((host) => host.email)
+      .join(', ');
+
     await ack({ response_type: 'in_channel' });
 
-    logger.info(`${new Date()} - space handle: ${spaceHandleWithoutAt}`);
-    client.views.open({
+    await client.views.open({
       trigger_id: command.trigger_id,
       view: {
         type: 'modal',
         callback_id: this.callbackId,
+        private_metadata: JSON.stringify({
+          spaceHandle,
+          channel: command.channel_id,
+          userId: command.user_id,
+        } as PrivateMetadata),
         title: {
           type: 'plain_text',
           text: 'Update Space Hosts',
@@ -68,7 +111,7 @@ export class HostManagementService implements SlashCommandService {
             fields: [
               {
                 type: 'mrkdwn',
-                text: `*Space* <https://umoh.io/@${spaceHandleWithoutAt}|@${spaceHandleWithoutAt}>`,
+                text: `*Space* <https://umoh.io/@${spaceHandle}|@${spaceHandle}>`,
               },
             ],
           },
@@ -89,6 +132,7 @@ export class HostManagementService implements SlashCommandService {
             },
             element: {
               type: 'plain_text_input',
+              initial_value: admins,
               multiline: true,
               focus_on_load: true,
               placeholder: {
@@ -111,6 +155,7 @@ export class HostManagementService implements SlashCommandService {
             },
             element: {
               type: 'plain_text_input',
+              initial_value: viewers,
               multiline: true,
               focus_on_load: false,
               placeholder: {
@@ -128,8 +173,16 @@ export class HostManagementService implements SlashCommandService {
     view,
     ack,
     logger,
+    client,
   }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
     logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
+
+    const { spaceHandle, channel, userId } = JSON.parse(
+      view.private_metadata
+    ) as PrivateMetadata;
+    logger.info(
+      `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
+    );
 
     const adminsInput =
       Object.values(view.state.values[this.blockIds.inputAdmins])[0].value ||
@@ -137,11 +190,44 @@ export class HostManagementService implements SlashCommandService {
     const viewersInput =
       Object.values(view.state.values[this.blockIds.inputViewers])[0].value ||
       '';
-    const admins = adminsInput.split(/[\s,]+/);
-    const viewers = viewersInput.split(/[\s,]+/);
+    const admins = [...new Set(adminsInput.split(/[\s,]+/))];
+    const viewers = [...new Set(viewersInput.split(/[\s,]+/))];
 
     logger.info(`${new Date()} - admins: ${admins} / viewers: ${viewers}`);
 
-    await ack();
+    const hosts: SpaceHost[] = [];
+    admins.forEach((admin) => {
+      hosts.push({ email: admin, accessType: 'ADMIN' });
+    });
+    viewers.forEach((viewer) => {
+      hosts.push({ email: viewer, accessType: 'VIEWER' });
+    });
+
+    try {
+      await SpaceApi.updateHosts(spaceHandle, { hosts });
+      logger.info(`${new Date()} - hosts updated`);
+    } catch (error) {
+      logger.error(`${new Date()} - error: ${error}`);
+      await ack({
+        response_action: 'errors',
+        errors: {
+          [this.blockIds.inputAdmins]: 'Failed to update space hosts.',
+          [this.blockIds.inputViewers]: 'Failed to update space hosts.',
+        },
+      });
+      return;
+    }
+
+    await ack({
+      response_action: 'clear',
+    });
+
+    await client.chat.postMessage({
+      channel: channel,
+      mrkdwn: true,
+      text:
+        `*Space hosts updated* for <https://umoh.io/@${spaceHandle}|@${spaceHandle}> by <@${userId}>\n` +
+        `*Admins*: ${admins.join(', ')}\n*Viewers*: ${viewers.join(', ')}`,
+    });
   }
 }

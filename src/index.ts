@@ -33,14 +33,14 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
   const { logger, command, ack } = args;
   logger.info(`${new Date()} - ${command.command} ${command.text}`);
 
-  slashCommandServices
-    .filter((service) => service.slashCommandName === command.command)
-    .forEach(async (service) => {
-      if (command.text.startsWith(service.slashCommandText)) {
-        await service.onSlashCommand(args);
-        return;
-      }
-    });
+  for (const service of slashCommandServices.filter(
+    (service) => service.slashCommandName === command.command
+  )) {
+    if (command.text.startsWith(service.slashCommandText)) {
+      await service.onSlashCommand(args);
+      return;
+    }
+  }
 
   await ack({
     response_type: 'ephemeral',
