@@ -48,15 +48,17 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
   });
 });
 
-['*/5 9-12 * * MON-FRI', '0-30/5 13 * * MON-FRI'].forEach((cronTime) => {
-  cron.schedule(
-    cronTime,
-    async () => {
-      await menuNotificationService.sendMenuNotification();
-    },
-    { timezone: 'Asia/Seoul' }
-  );
-});
+if (process.env.IS_PRODUCTION === 'true') {
+  ['*/5 9-12 * * MON-FRI', '0-30/5 13 * * MON-FRI'].forEach((cronTime) => {
+    cron.schedule(
+      cronTime,
+      async () => {
+        await menuNotificationService.sendMenuNotification();
+      },
+      { timezone: 'Asia/Seoul' }
+    );
+  });
+}
 
 (async () => {
   await app.start();
