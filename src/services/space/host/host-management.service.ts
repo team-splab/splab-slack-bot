@@ -33,10 +33,7 @@ export class HostManagementService implements SlashCommandService {
     client,
     command,
     ack,
-    ...args
   }: SlackCommandMiddlewareArgs & AllMiddlewareArgs): Promise<void> {
-    console.log(args, command);
-
     const spaceHandle = command.text
       .split(this.slashCommandText)[1]
       .trim()
