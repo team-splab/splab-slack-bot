@@ -12,6 +12,7 @@ import { app } from '../../../app';
 import { SpaceApi } from '../../../apis/space';
 import { SpaceHost } from '../../../apis/space/types';
 import { getSpaceUrl } from '../../../utils/space';
+import { getValuesFromState } from '../../../utils/slack';
 
 interface PrivateMetadata {
   spaceHandle: string;
@@ -184,14 +185,12 @@ export class HostManagementService implements SlashCommandService {
       `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
     );
 
-    const adminsInput =
-      Object.values(view.state.values[this.blockIds.inputAdmins])[0].value ||
-      '';
-    const viewersInput =
-      Object.values(view.state.values[this.blockIds.inputViewers])[0].value ||
-      '';
-    const admins = [...new Set(adminsInput.split(/[\s,]+/))];
-    const viewers = [...new Set(viewersInput.split(/[\s,]+/))];
+    const { inputAdmins = '', inputViewers = '' } = getValuesFromState({
+      state: view.state,
+      blockIds: this.blockIds,
+    });
+    const admins = [...new Set(inputAdmins.split(/[\s,]+/))];
+    const viewers = [...new Set(inputViewers.split(/[\s,]+/))];
 
     logger.info(`${new Date()} - admins: ${admins} / viewers: ${viewers}`);
 
