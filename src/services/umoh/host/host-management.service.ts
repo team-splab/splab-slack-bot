@@ -11,6 +11,7 @@ import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
 import { SpaceApi } from '../../../apis/space';
 import { SpaceHost } from '../../../apis/space/types';
+import { getSpaceUrl } from '../../../utils/space';
 
 interface PrivateMetadata {
   spaceHandle: string;
@@ -110,7 +111,7 @@ export class HostManagementService implements SlashCommandService {
             fields: [
               {
                 type: 'mrkdwn',
-                text: `*Space* <https://umoh.io/@${spaceHandle}|@${spaceHandle}>`,
+                text: `*Space* <${getSpaceUrl(spaceHandle)}|@${spaceHandle}>`,
               },
             ],
           },
@@ -225,7 +226,9 @@ export class HostManagementService implements SlashCommandService {
       channel: channel,
       mrkdwn: true,
       text:
-        `*Space hosts updated* for <https://umoh.io/@${spaceHandle}|@${spaceHandle}> by <@${userId}>\n` +
+        `*Space hosts updated* for <${getSpaceUrl(
+          spaceHandle
+        )}|@${spaceHandle}> by <@${userId}>\n` +
         `*Admins*: ${admins.join(', ')}\n*Viewers*: ${viewers.join(', ')}`,
     });
   }
