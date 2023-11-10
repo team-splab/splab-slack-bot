@@ -9,9 +9,13 @@ import {
 } from '../../slash-command.service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
+import { Space, SpaceUpdateParams } from '../../../apis/space/types';
+import { SpaceApi } from '../../../apis/space';
+import { getSpaceUrl } from '../../../utils/space';
+import { getValuesFromState } from '../../../utils/slack';
 
 interface PrivateMetadata {
-  spaceHandle: string;
+  space: Space;
   channel: string;
   userId: string;
 }
@@ -20,7 +24,10 @@ export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
   readonly slashCommandText = 'space edit';
   private readonly callbackId = 'space-edit';
-  private readonly blockIds = {};
+  private readonly blockIds = {
+    inputTitle: 'input-title',
+    inputDescription: 'input-description',
+  };
 
   constructor() {
     app.view(this.callbackId, this.onModalSubmit.bind(this));
@@ -48,6 +55,24 @@ export class SpaceEditService implements SlashCommandService {
 
     logger.info(`${new Date()} - space handle: ${spaceHandle}`);
 
+    let space: Space;
+    try {
+      const {
+        data: {
+          results: [response],
+        },
+      } = await SpaceApi.getSpace(spaceHandle);
+      space = response;
+      logger.info(`${new Date()} - space: ${JSON.stringify(space)}`);
+    } catch (error) {
+      logger.error(`${new Date()} - error: ${error}`);
+      await ack({
+        response_type: 'ephemeral',
+        text: `Failed to fetch space. Please check the space handle.`,
+      });
+      return;
+    }
+
     await ack({ response_type: 'in_channel' });
 
     await client.views.open({
@@ -56,7 +81,7 @@ export class SpaceEditService implements SlashCommandService {
         type: 'modal',
         callback_id: this.callbackId,
         private_metadata: JSON.stringify({
-          spaceHandle,
+          space,
           channel: command.channel_id,
           userId: command.user_id,
         } as PrivateMetadata),
@@ -72,7 +97,56 @@ export class SpaceEditService implements SlashCommandService {
           type: 'plain_text',
           text: 'Cancel',
         },
-        blocks: [],
+        blocks: [
+          {
+            type: 'section',
+            fields: [
+              {
+                type: 'mrkdwn',
+                text: `*Space* <${getSpaceUrl(spaceHandle)}|@${spaceHandle}>`,
+              },
+            ],
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'input',
+            optional: false,
+            block_id: this.blockIds.inputTitle,
+            label: {
+              type: 'plain_text',
+              text: 'Title',
+            },
+            element: {
+              type: 'plain_text_input',
+              initial_value: space.title,
+              focus_on_load: true,
+              placeholder: {
+                type: 'plain_text',
+                text: 'Space title',
+              },
+            },
+          },
+          {
+            type: 'input',
+            optional: true,
+            block_id: this.blockIds.inputDescription,
+            label: {
+              type: 'plain_text',
+              text: 'Description',
+            },
+            element: {
+              type: 'plain_text_input',
+              initial_value: space.description,
+              multiline: true,
+              placeholder: {
+                type: 'plain_text',
+                text: 'Space description',
+              },
+            },
+          },
+        ],
       },
     });
   }
@@ -85,25 +159,51 @@ export class SpaceEditService implements SlashCommandService {
   }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
     logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
 
-    const { spaceHandle, channel, userId } = JSON.parse(
+    const { space, channel, userId } = JSON.parse(
       view.private_metadata
     ) as PrivateMetadata;
     logger.info(
-      `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
+      `${new Date()} - space handle: ${
+        space.handle
+      }, channel: ${channel}, userId: ${userId}`
     );
 
+    const { inputTitle, inputDescription } = getValuesFromState({
+      state: view.state,
+      blockIds: this.blockIds,
+    });
+    const spaceUpdateParams: SpaceUpdateParams = {
+      ...space,
+      title: inputTitle || space.title,
+      description: inputDescription,
+      id: undefined,
+      hostId: undefined,
+      hosts: undefined,
+      todayViews: undefined,
+    };
+    logger.info(
+      `${new Date()} - space update params: ${JSON.stringify(
+        spaceUpdateParams
+      )}`
+    );
+
+    let spaceUpdated: Space;
     try {
-      // await SpaceApi.updateHosts(spaceHandle, { hosts });
-      logger.info(`${new Date()} - hosts updated`);
+      const {
+        data: {
+          results: [response],
+        },
+      } = await SpaceApi.updateSpace(space.handle, spaceUpdateParams);
+      spaceUpdated = response;
+      logger.info(`${new Date()} - space updated`);
     } catch (error) {
       logger.error(`${new Date()} - error: ${error}`);
-      // await ack({
-      //   response_action: 'errors',
-      //   errors: {
-      //     [this.blockIds.inputAdmins]: 'Failed to update space hosts.',
-      //     [this.blockIds.inputViewers]: 'Failed to update space hosts.',
-      //   },
-      // });
+      await ack({
+        response_action: 'errors',
+        errors: {
+          [this.blockIds.inputTitle]: 'Failed to edit space',
+        },
+      });
       return;
     }
 
@@ -111,12 +211,32 @@ export class SpaceEditService implements SlashCommandService {
       response_action: 'clear',
     });
 
-    // await client.chat.postMessage({
-    //   channel: channel,
-    //   mrkdwn: true,
-    //   text:
-    //     `*Space hosts updated* for <https://umoh.io/@${spaceHandle}|@${spaceHandle}> by <@${userId}>\n` +
-    //     `*Admins*: ${admins.join(', ')}\n*Viewers*: ${viewers.join(', ')}`,
-    // });
+    await client.chat.postMessage({
+      channel: channel,
+      mrkdwn: true,
+      text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
+        spaceUpdated.handle
+      }>* has been edited by <@${userId}>`,
+      blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
+              space.handle
+            }>* has been edited by <@${userId}>`,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text:
+              `*Title*\n${spaceUpdated.title}\n` +
+              `*Description*\n${spaceUpdated.description || ''}`,
+          },
+        },
+      ],
+    });
   }
 }

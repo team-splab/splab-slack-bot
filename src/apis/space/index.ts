@@ -1,6 +1,11 @@
 import { sendtimeApi } from '../../utils/api';
 import { SendtimeApiResponse } from '../types';
-import { SpaceHost, SpaceHostsResponse, SpaceHostsUpdateParams } from './types';
+import {
+  SpaceHostsResponse,
+  SpaceHostsUpdateParams,
+  SpaceResponse,
+  SpaceUpdateParams,
+} from './types';
 
 export const SpaceApi = {
   getHosts: (spaceHandle: string) => {
@@ -9,8 +14,19 @@ export const SpaceApi = {
     );
   },
   updateHosts: (spaceHandle: string, params: SpaceHostsUpdateParams) => {
-    return sendtimeApi.patch<SendtimeApiResponse<SpaceHostsResponse>>(
+    return sendtimeApi.patch<SendtimeApiResponse<SpaceResponse>>(
       `/v2/space/${spaceHandle}/host`,
+      params
+    );
+  },
+  getSpace: (spaceHandle: string) => {
+    return sendtimeApi.get<SendtimeApiResponse<SpaceResponse>>(
+      `/v2/space/${spaceHandle}`
+    );
+  },
+  updateSpace: (spaceHandle: string, params: SpaceUpdateParams) => {
+    return sendtimeApi.put<SendtimeApiResponse<SpaceResponse>>(
+      `/v2/space/${spaceHandle}`,
       params
     );
   },
