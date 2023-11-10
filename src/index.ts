@@ -8,6 +8,7 @@ import { MenuSelectService } from './services/menu-notification/menu-select.serv
 import { DailyReportService } from './services/space/daily-report/daily-report.service';
 import { HostManagementService } from './services/space/host/host-management.service';
 import { SlashCommandService } from './services/slash-command.service';
+import { SpaceEditService } from './services/space/edit/space-edit.service';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const menuSelectService = new MenuSelectService();
 const dailyReportService = new DailyReportService();
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
+  new SpaceEditService(),
 ];
 
 app.event('app_mention', async ({ event, say }) => {
