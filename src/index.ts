@@ -1,14 +1,14 @@
 import dotenv from 'dotenv';
 import { app } from './app';
 import { MenuNotificationService } from './services/menu-notification/menu-notification.service';
-import * as cron from 'node-cron';
-import { ACTIONS, MENU_CHANNEL_ID } from './utils/consts';
-import { SLASH_COMMANDS } from './utils/consts';
+import { MENU_CHANNEL_ID, SLASH_COMMANDS } from './utils/consts';
 import { MenuSelectService } from './services/menu-notification/menu-select.service';
+import initSpaceServices from './services/space';
 import { DailyReportService } from './services/space/daily-report/daily-report.service';
 import { HostManagementService } from './services/space/host/host-management.service';
-import { SlashCommandService } from './services/slash-command.service';
 import { SpaceEditService } from './services/space/edit/space-edit.service';
+import { SlashCommandService } from './services/slash-command.service';
+import initMenuNotificationService from './services/menu-notification';
 
 dotenv.config();
 
@@ -27,46 +27,13 @@ app.event('app_mention', async ({ event, say }) => {
   await say(`Hey there <@${event.user}>! ${new Date().toLocaleString()}`);
 });
 
-app.action(ACTIONS.MENU_SELECT, menuSelectService.onMenuSelectAction);
-
-app.command(SLASH_COMMANDS.DAILY_REPORT, dailyReportService.sendDailyReport);
-
-app.command(SLASH_COMMANDS.UMOH, async (args) => {
-  const { logger, command, ack } = args;
-  logger.info(`${new Date()} - ${command.command} ${command.text}`);
-
-  for (const service of slashCommandServices.filter(
-    (service) => service.slashCommandName === command.command
-  )) {
-    if (command.text.startsWith(service.slashCommandText)) {
-      const params = command.text
-        .split(service.slashCommandText)[1]
-        .trim()
-        .split(' ')
-        .filter((param) => param);
-
-      await service.onSlashCommand({ ...args, params });
-      return;
-    }
-  }
-
-  await ack({
-    response_type: 'ephemeral',
-    text: `\`${command.command} ${command.text}\` command is not supported.`,
-  });
-});
-
-if (process.env.IS_PRODUCTION === 'true') {
-  ['*/5 9-12 * * MON-FRI', '0-30/5 13 * * MON-FRI'].forEach((cronTime) => {
-    cron.schedule(
-      cronTime,
-      async () => {
-        await menuNotificationService.sendMenuNotification();
-      },
-      { timezone: 'Asia/Seoul' }
-    );
-  });
-}
+initSpaceServices(
+  dailyReportService,
+  slashCommandServices.filter(
+    (service) => service.slashCommandName === SLASH_COMMANDS.UMOH
+  )
+);
+initMenuNotificationService(menuNotificationService, menuSelectService);
 
 (async () => {
   await app.start();
