@@ -3,7 +3,10 @@ import {
   AllMiddlewareArgs,
   SlackViewMiddlewareArgs,
 } from '@slack/bolt';
-import { SlashCommandService } from '../../slash-command.service';
+import {
+  SlashCommandParams,
+  SlashCommandService,
+} from '../../slash-command.service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
 
@@ -27,13 +30,12 @@ export class SpaceEditService implements SlashCommandService {
     logger,
     client,
     command,
+    params: [spaceHandle],
     ack,
-  }: SlackCommandMiddlewareArgs & AllMiddlewareArgs): Promise<void> {
-    const spaceHandle = command.text
-      .split(this.slashCommandText)[1]
-      .trim()
-      .split(' ')[0]
-      .replace('@', '');
+  }: SlackCommandMiddlewareArgs &
+    AllMiddlewareArgs &
+    SlashCommandParams): Promise<void> {
+    spaceHandle = spaceHandle.replace('@', '');
 
     if (!spaceHandle) {
       logger.info(`${new Date()} - space handle is not provided`);

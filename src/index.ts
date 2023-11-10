@@ -39,7 +39,13 @@ app.command(SLASH_COMMANDS.UMOH, async (args) => {
     (service) => service.slashCommandName === command.command
   )) {
     if (command.text.startsWith(service.slashCommandText)) {
-      await service.onSlashCommand(args);
+      const params = command.text
+        .split(service.slashCommandText)[1]
+        .trim()
+        .split(' ')
+        .filter((param) => param);
+
+      await service.onSlashCommand({ ...args, params });
       return;
     }
   }
