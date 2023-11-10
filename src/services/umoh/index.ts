@@ -3,7 +3,7 @@ import { SLASH_COMMANDS } from '../../utils/consts';
 import { SlashCommandService } from '../slash-command.service';
 import { DailyReportService } from './daily-report/daily-report.service';
 
-export default function initSpaceServices(
+export default function initUmohServices(
   dailyReportService: DailyReportService,
   slashCommandServices: SlashCommandService[]
 ): void {
