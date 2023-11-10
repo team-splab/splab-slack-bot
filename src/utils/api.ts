@@ -23,7 +23,11 @@ sendtimeApi.interceptors.response.use(
     return response;
   },
   async ({ response, config }: AxiosError<SendtimeApiResponse<void>>) => {
-    const { method, url } = config!;
+    if (!config) {
+      return Promise.reject(response?.data);
+    }
+
+    const { method, url } = config;
     const {
       status,
       statusText,
@@ -37,6 +41,8 @@ sendtimeApi.interceptors.response.use(
     );
 
     if (code === 4010 || code === 4013) {
+      delete sendtimeApi.defaults.headers['Authorization'];
+      delete config.headers['Authorization'];
       const {
         data: {
           results: [{ accessToken }],
@@ -47,6 +53,7 @@ sendtimeApi.interceptors.response.use(
       });
 
       sendtimeApi.defaults.headers['Authorization'] = `Bearer ${accessToken}`;
+      config.headers['Authorization'] = `Bearer ${accessToken}`;
 
       if (config) {
         return sendtimeApi.request(config);
