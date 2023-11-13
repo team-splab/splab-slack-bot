@@ -17,7 +17,7 @@ import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 
 interface PrivateMetadata {
-  space: Space;
+  spaceHandle: string;
   channel: string;
   userId: string;
 }
@@ -88,7 +88,7 @@ export class SpaceEditService implements SlashCommandService {
         type: 'modal',
         callback_id: this.callbackId,
         private_metadata: JSON.stringify({
-          space,
+          spaceHandle: space.handle,
           channel: command.channel_id,
           userId: command.user_id,
         } as PrivateMetadata),
@@ -211,14 +211,32 @@ export class SpaceEditService implements SlashCommandService {
   }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
     logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
 
-    const { space, channel, userId } = JSON.parse(
+    const { spaceHandle, channel, userId } = JSON.parse(
       view.private_metadata
     ) as PrivateMetadata;
     logger.info(
-      `${new Date()} - space handle: ${
-        space.handle
-      }, channel: ${channel}, userId: ${userId}`
+      `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
     );
+
+    let space: Space;
+    try {
+      const {
+        data: {
+          results: [response],
+        },
+      } = await SpaceApi.getSpace(spaceHandle);
+      space = response;
+      logger.info(`${new Date()} - space: ${JSON.stringify(space)}`);
+    } catch (error) {
+      logger.error(`${new Date()} - error: ${error}`);
+      await ack({
+        response_action: 'errors',
+        errors: {
+          [Object.values(this.blockIds)[0]]: 'Failed to fetch space',
+        },
+      });
+      return;
+    }
 
     const { inputTitle, inputDescription, inputHandle } = getValuesFromState({
       state: view.state,
