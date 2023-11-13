@@ -2,6 +2,8 @@ import {
   SlackCommandMiddlewareArgs,
   AllMiddlewareArgs,
   SlackViewMiddlewareArgs,
+  Block,
+  KnownBlock,
 } from '@slack/bolt';
 import {
   SlashCommandParams,
@@ -27,6 +29,10 @@ export class SpaceEditService implements SlashCommandService {
   private readonly blockIds = {
     inputTitle: 'input-title',
     inputDescription: 'input-description',
+  };
+  private readonly actionIds = {
+    editCategory: 'edit-category',
+    addCategory: 'add-category',
   };
 
   constructor() {
@@ -111,6 +117,13 @@ export class SpaceEditService implements SlashCommandService {
             type: 'divider',
           },
           {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+              text: 'Basic Information',
+            },
+          },
+          {
             type: 'input',
             optional: false,
             block_id: this.blockIds.inputTitle,
@@ -145,6 +158,32 @@ export class SpaceEditService implements SlashCommandService {
                 text: 'Space description',
               },
             },
+          },
+          {
+            type: 'divider',
+          },
+          {
+            type: 'header',
+            text: {
+              type: 'plain_text',
+
+              text: 'Categories',
+            },
+          },
+          ...this.buildCategoryBlocks(space),
+          {
+            type: 'actions',
+            elements: [
+              {
+                type: 'button',
+                style: 'primary',
+                action_id: this.actionIds.addCategory,
+                text: {
+                  type: 'plain_text',
+                  text: 'Add Category',
+                },
+              },
+            ],
           },
         ],
       },
@@ -238,5 +277,47 @@ export class SpaceEditService implements SlashCommandService {
         },
       ],
     });
+  }
+
+  private buildCategoryBlocks(space: Space): (Block | KnownBlock)[] {
+    const blocks: (Block | KnownBlock)[] = [];
+
+    space.profileCategoryConfig?.categoryItems.forEach((categoryItem) => {
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: categoryItem.localizedNames[0].text,
+        },
+        accessory: {
+          type: 'button',
+          value: categoryItem.id,
+          action_id: this.actionIds.editCategory,
+          text: {
+            type: 'plain_text',
+            text: 'Edit',
+            emoji: true,
+          },
+        },
+      });
+      blocks.push({
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: categoryItem.id,
+          },
+          {
+            type: 'mrkdwn',
+            text: categoryItem.color || ' ',
+          },
+        ],
+      });
+      blocks.push({
+        type: 'divider',
+      });
+    });
+
+    return blocks;
   }
 }

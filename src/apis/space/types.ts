@@ -29,4 +29,20 @@ export interface Space {
   title: string;
   todayViews: number;
   description?: string;
+  profileCategoryConfig?: {
+    defaultLanguage: string;
+    localizedCategoryLabels: LocalizedText[];
+    categoryItems: {
+      id: string;
+      localizedNames: LocalizedText[];
+      color?: string;
+      isPrivate?: boolean;
+    }[];
+    maxItemNumber: number;
+  };
+}
+
+interface LocalizedText {
+  language: string;
+  text: string;
 }
