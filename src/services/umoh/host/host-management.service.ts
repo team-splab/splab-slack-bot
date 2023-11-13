@@ -1,10 +1,6 @@
+import { AllMiddlewareArgs, SlackViewMiddlewareArgs } from '@slack/bolt';
 import {
-  SlackCommandMiddlewareArgs,
-  AllMiddlewareArgs,
-  SlackViewMiddlewareArgs,
-} from '@slack/bolt';
-import {
-  SlashCommandParams,
+  SlashCommandArgs,
   SlashCommandService,
 } from '../../slash-command.service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
@@ -39,9 +35,7 @@ export class HostManagementService implements SlashCommandService {
     command,
     params: [spaceHandle],
     ack,
-  }: SlackCommandMiddlewareArgs &
-    AllMiddlewareArgs &
-    SlashCommandParams): Promise<void> {
+  }: SlashCommandArgs): Promise<void> {
     spaceHandle = spaceHandle.replace('@', '');
 
     if (!spaceHandle) {
