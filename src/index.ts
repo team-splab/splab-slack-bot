@@ -9,6 +9,7 @@ import { HostManagementService } from './services/umoh/host/host-management.serv
 import { SpaceEditService } from './services/umoh/edit/space-edit.service';
 import { SlashCommandService } from './services/slash-command.service';
 import initMenuNotificationService from './services/menu-notification';
+import { SpaceCategoryEditService } from './services/umoh/edit/space-category-edit.service';
 
 dotenv.config();
 
@@ -17,9 +18,10 @@ export const menuNotificationService = new MenuNotificationService(
 );
 const menuSelectService = new MenuSelectService();
 const dailyReportService = new DailyReportService();
+const spaceCategoryEditService = new SpaceCategoryEditService();
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
-  new SpaceEditService(),
+  new SpaceEditService(spaceCategoryEditService),
 ];
 
 app.event('app_mention', async ({ event, say }) => {

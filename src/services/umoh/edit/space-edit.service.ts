@@ -14,6 +14,10 @@ import { Space, SpaceUpdateParams } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
 import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
+import {
+  SpaceCategoryEditActionValue,
+  SpaceCategoryEditService,
+} from './space-category-edit.service';
 
 interface PrivateMetadata {
   spaceHandle: string;
@@ -35,8 +39,15 @@ export class SpaceEditService implements SlashCommandService {
     addCategory: 'add-category',
   };
 
-  constructor() {
+  private readonly categoryEditService: SpaceCategoryEditService;
+
+  constructor(categoryEditService: SpaceCategoryEditService) {
+    this.categoryEditService = categoryEditService;
     app.view(this.callbackId, this.onModalSubmit.bind(this));
+    app.action(
+      this.actionIds.editCategory,
+      this.categoryEditService.onCategoryEdit.bind(this.categoryEditService)
+    );
   }
 
   async onSlashCommand({
@@ -322,11 +333,11 @@ export class SpaceEditService implements SlashCommandService {
         },
         accessory: {
           type: 'button',
-          value: categoryItem.id,
+          value: JSON.stringify(categoryItem as SpaceCategoryEditActionValue),
           action_id: this.actionIds.editCategory,
           text: {
             type: 'plain_text',
-            text: 'Edit',
+            text: 'Edit / Remove',
             emoji: true,
           },
         },

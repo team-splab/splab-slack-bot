@@ -29,20 +29,24 @@ export interface Space {
   title: string;
   todayViews: number;
   description?: string;
-  profileCategoryConfig?: {
-    defaultLanguage: string;
-    localizedCategoryLabels: LocalizedText[];
-    categoryItems: {
-      id: string;
-      localizedNames: LocalizedText[];
-      color?: string;
-      isPrivate?: boolean;
-    }[];
-    maxItemNumber: number;
-  };
+  profileCategoryConfig?: SpaceProfileCategoryConfig;
 }
 
-interface LocalizedText {
+export interface SpaceProfileCategoryConfig {
+  defaultLanguage: string;
+  localizedCategoryLabels: LocalizedText[];
+  categoryItems: SpaceProfileCategoryItem[];
+  maxItemNumber: number;
+}
+
+export interface SpaceProfileCategoryItem {
+  id: string;
+  localizedNames: LocalizedText[];
+  color?: string;
+  isPrivate?: boolean;
+}
+
+export interface LocalizedText {
   language: string;
   text: string;
 }
