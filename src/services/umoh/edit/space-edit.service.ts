@@ -27,6 +27,7 @@ export class SpaceEditService implements SlashCommandService {
   readonly slashCommandText = 'space edit';
   private readonly callbackId = 'space-edit';
   private readonly blockIds = {
+    inputHandle: 'input-handle',
     inputTitle: 'input-title',
     inputDescription: 'input-description',
   };
@@ -105,15 +106,6 @@ export class SpaceEditService implements SlashCommandService {
         },
         blocks: [
           {
-            type: 'section',
-            fields: [
-              {
-                type: 'mrkdwn',
-                text: `*Space* <${getSpaceUrl(spaceHandle)}|@${spaceHandle}>`,
-              },
-            ],
-          },
-          {
             type: 'divider',
           },
           {
@@ -121,6 +113,28 @@ export class SpaceEditService implements SlashCommandService {
             text: {
               type: 'plain_text',
               text: 'Basic Information',
+            },
+          },
+          {
+            type: 'input',
+            optional: false,
+            block_id: this.blockIds.inputHandle,
+            label: {
+              type: 'plain_text',
+              text: 'Handle',
+            },
+            hint: {
+              type: 'plain_text',
+              text: 'Space handle without @',
+            },
+            element: {
+              type: 'plain_text_input',
+              initial_value: space.handle,
+              focus_on_load: true,
+              placeholder: {
+                type: 'plain_text',
+                text: 'Space handle without @',
+              },
             },
           },
           {
@@ -134,7 +148,6 @@ export class SpaceEditService implements SlashCommandService {
             element: {
               type: 'plain_text_input',
               initial_value: space.title,
-              focus_on_load: true,
               placeholder: {
                 type: 'plain_text',
                 text: 'Space title',
@@ -207,12 +220,13 @@ export class SpaceEditService implements SlashCommandService {
       }, channel: ${channel}, userId: ${userId}`
     );
 
-    const { inputTitle, inputDescription } = getValuesFromState({
+    const { inputTitle, inputDescription, inputHandle } = getValuesFromState({
       state: view.state,
       blockIds: this.blockIds,
     });
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
+      handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
       id: undefined,
@@ -240,7 +254,7 @@ export class SpaceEditService implements SlashCommandService {
       await ack({
         response_action: 'errors',
         errors: {
-          [this.blockIds.inputTitle]: 'Failed to edit space',
+          [Object.values(this.blockIds)[0]]: 'Failed to edit space',
         },
       });
       return;
@@ -253,24 +267,26 @@ export class SpaceEditService implements SlashCommandService {
     await client.chat.postMessage({
       channel: channel,
       mrkdwn: true,
-      text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
-        spaceUpdated.handle
-      }>* has been edited by <@${userId}>`,
+      text: `@${spaceUpdated.handle} has been edited by <@${userId}>`,
       blocks: [
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
             text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
-              space.handle
+              spaceUpdated.handle
             }>* has been edited by <@${userId}>`,
           },
+        },
+        {
+          type: 'divider',
         },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
             text:
+              `*Handle*\n@${spaceUpdated.handle}\n` +
               `*Title*\n${spaceUpdated.title}\n` +
               `*Description*\n${spaceUpdated.description || ''}`,
           },
