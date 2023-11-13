@@ -287,7 +287,7 @@ export class SpaceEditService implements SlashCommandService {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: categoryItem.localizedNames[0].text,
+          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
         },
         accessory: {
           type: 'button',
