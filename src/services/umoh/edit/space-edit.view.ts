@@ -1,6 +1,7 @@
 import { KnownBlock, View } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
 import { SpaceCategoryEditActionValue } from './space-category-edit.service';
+import { ViewBuilder } from '../../../interfaces/view-builder';
 
 export interface SpaceEditViewPrivateMetadata {
   spaceHandle: string;
@@ -8,7 +9,7 @@ export interface SpaceEditViewPrivateMetadata {
   userId: string;
 }
 
-export class SpaceEditView {
+export class SpaceEditView implements ViewBuilder {
   readonly callbackId = 'space-edit';
 
   readonly blockIds = {
