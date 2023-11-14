@@ -1,6 +1,14 @@
-import { KnownBlock, View } from '@slack/bolt';
+import { KnownBlock, View, ViewOutput } from '@slack/bolt';
 import { ViewBuilder } from '../../../interfaces/view-builder';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
+import { SpaceEditViewPrivateMetadata } from './space-edit.view';
+
+export interface SpaceCategoryEditViewPrivateMetadata {
+  categoryIdToEdit: string;
+  spaceEditViewId: string;
+  spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata;
+  spaceEditViewState: ViewOutput['state'];
+}
 
 export class SpaceCategoryEditView implements ViewBuilder {
   readonly callbackId = 'space-category-edit';
@@ -13,10 +21,19 @@ export class SpaceCategoryEditView implements ViewBuilder {
     inputCategoryNameZh: 'input-category-name-zh',
   };
 
-  build({ categoryItem }: { categoryItem: SpaceProfileCategoryItem }): View {
+  build({
+    privateMetadata,
+    initialValues,
+  }: {
+    privateMetadata: SpaceCategoryEditViewPrivateMetadata;
+    initialValues: {
+      categoryItem: SpaceProfileCategoryItem;
+    };
+  }): View {
     return {
       type: 'modal',
       callback_id: this.callbackId,
+      private_metadata: JSON.stringify(privateMetadata),
       title: {
         type: 'plain_text',
         text: 'Edit category',
@@ -44,7 +61,7 @@ export class SpaceCategoryEditView implements ViewBuilder {
           },
           element: {
             type: 'plain_text_input',
-            initial_value: categoryItem.id,
+            initial_value: initialValues.categoryItem.id,
             focus_on_load: true,
             placeholder: {
               type: 'plain_text',
@@ -66,7 +83,7 @@ export class SpaceCategoryEditView implements ViewBuilder {
           },
           element: {
             type: 'plain_text_input',
-            initial_value: categoryItem.color,
+            initial_value: initialValues.categoryItem.color,
             placeholder: {
               type: 'plain_text',
               text: 'Hex color code for the category. e.g. #FF0000',
@@ -85,26 +102,30 @@ export class SpaceCategoryEditView implements ViewBuilder {
         },
         this.buildCategoryNameBlock(
           this.blockIds.inputCategoryNameKo,
-          categoryItem.localizedNames.find((name) => name.language === 'ko')
-            ?.text || '',
+          initialValues.categoryItem.localizedNames.find(
+            (name) => name.language === 'ko'
+          )?.text || '',
           'Korean'
         ),
         this.buildCategoryNameBlock(
           this.blockIds.inputCategoryNameEn,
-          categoryItem.localizedNames.find((name) => name.language === 'en')
-            ?.text || '',
+          initialValues.categoryItem.localizedNames.find(
+            (name) => name.language === 'en'
+          )?.text || '',
           'English'
         ),
         this.buildCategoryNameBlock(
           this.blockIds.inputCategoryNameVi,
-          categoryItem.localizedNames.find((name) => name.language === 'vi')
-            ?.text || '',
+          initialValues.categoryItem.localizedNames.find(
+            (name) => name.language === 'vi'
+          )?.text || '',
           'Vietnamese'
         ),
         this.buildCategoryNameBlock(
           this.blockIds.inputCategoryNameZh,
-          categoryItem.localizedNames.find((name) => name.language === 'zh')
-            ?.text || '',
+          initialValues.categoryItem.localizedNames.find(
+            (name) => name.language === 'zh'
+          )?.text || '',
           'Taiwanese'
         ),
       ],

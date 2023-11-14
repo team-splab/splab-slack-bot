@@ -7,6 +7,7 @@ export interface SpaceEditViewPrivateMetadata {
   spaceHandle: string;
   channel: string;
   userId: string;
+  categoryItems: SpaceProfileCategoryItem[];
 }
 
 export class SpaceEditView implements ViewBuilder {

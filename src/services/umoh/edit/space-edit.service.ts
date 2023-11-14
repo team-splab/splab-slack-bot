@@ -80,6 +80,7 @@ export class SpaceEditService implements SlashCommandService {
           spaceHandle,
           channel: command.channel_id,
           userId: command.user_id,
+          categoryItems: space.profileCategoryConfig?.categoryItems || [],
         },
         initialValues: {
           handle: space.handle,

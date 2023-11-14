@@ -11,6 +11,7 @@ import { SlashCommandService } from './interfaces/slash-command-service';
 import initMenuNotificationService from './services/menu-notification';
 import { SpaceCategoryEditService } from './services/umoh/edit/space-category-edit.service';
 import { SpaceEditView } from './services/umoh/edit/space-edit.view';
+import { SpaceCategoryEditView } from './services/umoh/edit/space-category-edit.view';
 
 dotenv.config();
 
@@ -20,7 +21,11 @@ export const menuNotificationService = new MenuNotificationService(
 const menuSelectService = new MenuSelectService();
 const dailyReportService = new DailyReportService();
 const spaceEditView = new SpaceEditView();
-const spaceCategoryEditService = new SpaceCategoryEditService();
+const spaceCategoryEditView = new SpaceCategoryEditView();
+const spaceCategoryEditService = new SpaceCategoryEditService(
+  spaceCategoryEditView,
+  spaceEditView
+);
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
   new SpaceEditService(spaceCategoryEditService, spaceEditView),
