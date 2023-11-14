@@ -1,11 +1,19 @@
-import { AllMiddlewareArgs, SlackViewMiddlewareArgs } from '@slack/bolt';
+import {
+  AllMiddlewareArgs,
+  KnownBlock,
+  SlackViewMiddlewareArgs,
+} from '@slack/bolt';
 import {
   SlashCommandArgs,
   SlashCommandService,
 } from '../../../interfaces/slash-command-service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
-import { Space, SpaceUpdateParams } from '../../../apis/space/types';
+import {
+  Space,
+  SpaceProfileCategoryItem,
+  SpaceUpdateParams,
+} from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
 import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
@@ -100,7 +108,7 @@ export class SpaceEditService implements SlashCommandService {
   }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
     logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
 
-    const { spaceHandle, channel, userId } = JSON.parse(
+    const { spaceHandle, channel, userId, categoryItems } = JSON.parse(
       view.private_metadata
     ) as SpaceEditViewPrivateMetadata;
     logger.info(
@@ -137,6 +145,10 @@ export class SpaceEditService implements SlashCommandService {
       handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
+      profileCategoryConfig: space.profileCategoryConfig && {
+        ...space.profileCategoryConfig,
+        categoryItems,
+      },
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -188,6 +200,13 @@ export class SpaceEditService implements SlashCommandService {
           },
         },
         {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Basic Information',
+          },
+        },
+        {
           type: 'divider',
         },
         {
@@ -200,7 +219,52 @@ export class SpaceEditService implements SlashCommandService {
               `*Description*\n${spaceUpdated.description || ''}`,
           },
         },
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Categories',
+          },
+        },
+        {
+          type: 'divider',
+        },
+        ...this.buildCategoryBlocks(categoryItems),
       ],
     });
+  }
+
+  private buildCategoryBlocks(
+    categoryItems: SpaceProfileCategoryItem[]
+  ): KnownBlock[] {
+    const blocks: KnownBlock[] = [];
+
+    categoryItems.forEach((categoryItem) => {
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
+        },
+      });
+      blocks.push({
+        type: 'context',
+        elements: [
+          {
+            type: 'mrkdwn',
+            text: categoryItem.id,
+          },
+          {
+            type: 'mrkdwn',
+            text: categoryItem.color || ' ',
+          },
+        ],
+      });
+      blocks.push({
+        type: 'divider',
+      });
+    });
+
+    return blocks;
   }
 }
