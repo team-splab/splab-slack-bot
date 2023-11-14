@@ -53,14 +53,14 @@ export class SpaceEditView implements ViewBuilder {
       },
       blocks: [
         {
-          type: 'divider',
-        },
-        {
           type: 'header',
           text: {
             type: 'plain_text',
             text: 'Basic Information',
           },
+        },
+        {
+          type: 'divider',
         },
         {
           type: 'input',
@@ -120,15 +120,15 @@ export class SpaceEditView implements ViewBuilder {
           },
         },
         {
-          type: 'divider',
-        },
-        {
           type: 'header',
           text: {
             type: 'plain_text',
 
             text: 'Categories',
           },
+        },
+        {
+          type: 'divider',
         },
         ...this.buildCategoryBlocks(initialValues.categoryItems),
         {
