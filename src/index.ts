@@ -7,7 +7,7 @@ import initUmohServices from './services/umoh';
 import { DailyReportService } from './services/umoh/daily-report/daily-report.service';
 import { HostManagementService } from './services/umoh/host/host-management.service';
 import { SpaceEditService } from './services/umoh/edit/space-edit.service';
-import { SlashCommandService } from './services/slash-command.service';
+import { SlashCommandService } from './interfaces/slash-command.service';
 import initMenuNotificationService from './services/menu-notification';
 import { SpaceCategoryEditService } from './services/umoh/edit/space-category-edit.service';
 import { SpaceEditView } from './services/umoh/edit/space-edit.view';

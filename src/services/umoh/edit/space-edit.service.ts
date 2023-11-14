@@ -2,7 +2,7 @@ import { AllMiddlewareArgs, SlackViewMiddlewareArgs } from '@slack/bolt';
 import {
   SlashCommandArgs,
   SlashCommandService,
-} from '../../slash-command.service';
+} from '../../../interfaces/slash-command.service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
 import { Space, SpaceUpdateParams } from '../../../apis/space/types';

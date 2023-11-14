@@ -1,6 +1,6 @@
 import { app } from '../../app';
 import { SLASH_COMMANDS } from '../../utils/consts';
-import { SlashCommandService } from '../slash-command.service';
+import { SlashCommandService } from '../../interfaces/slash-command.service';
 import { DailyReportService } from './daily-report/daily-report.service';
 
 export default function initUmohServices(
