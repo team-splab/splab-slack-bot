@@ -1,9 +1,4 @@
-import {
-  AllMiddlewareArgs,
-  SlackViewMiddlewareArgs,
-  Block,
-  KnownBlock,
-} from '@slack/bolt';
+import { AllMiddlewareArgs, SlackViewMiddlewareArgs } from '@slack/bolt';
 import {
   SlashCommandArgs,
   SlashCommandService,
@@ -14,38 +9,26 @@ import { Space, SpaceUpdateParams } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
 import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
-import {
-  SpaceCategoryEditActionValue,
-  SpaceCategoryEditService,
-} from './space-category-edit.service';
-
-interface PrivateMetadata {
-  spaceHandle: string;
-  channel: string;
-  userId: string;
-}
+import { SpaceCategoryEditService } from './space-category-edit.service';
+import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
   readonly slashCommandText = 'space edit';
-  private readonly callbackId = 'space-edit';
-  private readonly blockIds = {
-    inputHandle: 'input-handle',
-    inputTitle: 'input-title',
-    inputDescription: 'input-description',
-  };
-  private readonly actionIds = {
-    editCategory: 'edit-category',
-    addCategory: 'add-category',
-  };
 
   private readonly categoryEditService: SpaceCategoryEditService;
+  private readonly spaceEditView: SpaceEditView;
 
-  constructor(categoryEditService: SpaceCategoryEditService) {
+  constructor(
+    categoryEditService: SpaceCategoryEditService,
+    spaceEditView: SpaceEditView
+  ) {
     this.categoryEditService = categoryEditService;
-    app.view(this.callbackId, this.onModalSubmit.bind(this));
+    this.spaceEditView = spaceEditView;
+
+    app.view(this.spaceEditView.callbackId, this.onModalSubmit.bind(this));
     app.action(
-      this.actionIds.editCategory,
+      this.spaceEditView.actionIds.editCategory,
       this.categoryEditService.onCategoryEdit.bind(this.categoryEditService)
     );
   }
@@ -92,122 +75,19 @@ export class SpaceEditService implements SlashCommandService {
 
     await client.views.open({
       trigger_id: command.trigger_id,
-      view: {
-        type: 'modal',
-        callback_id: this.callbackId,
-        private_metadata: JSON.stringify({
-          spaceHandle: space.handle,
+      view: this.spaceEditView.buildSpaceEditView({
+        privateMetadata: {
+          spaceHandle,
           channel: command.channel_id,
           userId: command.user_id,
-        } as PrivateMetadata),
-        title: {
-          type: 'plain_text',
-          text: 'Edit Space',
         },
-        submit: {
-          type: 'plain_text',
-          text: 'Edit',
+        initialValues: {
+          handle: space.handle,
+          title: space.title,
+          description: space.description,
+          categoryItems: space.profileCategoryConfig?.categoryItems || [],
         },
-        close: {
-          type: 'plain_text',
-          text: 'Cancel',
-        },
-        blocks: [
-          {
-            type: 'divider',
-          },
-          {
-            type: 'header',
-            text: {
-              type: 'plain_text',
-              text: 'Basic Information',
-            },
-          },
-          {
-            type: 'input',
-            optional: false,
-            block_id: this.blockIds.inputHandle,
-            label: {
-              type: 'plain_text',
-              text: 'Handle',
-            },
-            hint: {
-              type: 'plain_text',
-              text: 'Space handle without @',
-            },
-            element: {
-              type: 'plain_text_input',
-              initial_value: space.handle,
-              focus_on_load: true,
-              placeholder: {
-                type: 'plain_text',
-                text: 'Space handle without @',
-              },
-            },
-          },
-          {
-            type: 'input',
-            optional: false,
-            block_id: this.blockIds.inputTitle,
-            label: {
-              type: 'plain_text',
-              text: 'Title',
-            },
-            element: {
-              type: 'plain_text_input',
-              initial_value: space.title,
-              placeholder: {
-                type: 'plain_text',
-                text: 'Space title',
-              },
-            },
-          },
-          {
-            type: 'input',
-            optional: true,
-            block_id: this.blockIds.inputDescription,
-            label: {
-              type: 'plain_text',
-              text: 'Description',
-            },
-            element: {
-              type: 'plain_text_input',
-              initial_value: space.description,
-              multiline: true,
-              placeholder: {
-                type: 'plain_text',
-                text: 'Space description',
-              },
-            },
-          },
-          {
-            type: 'divider',
-          },
-          {
-            type: 'header',
-            text: {
-              type: 'plain_text',
-
-              text: 'Categories',
-            },
-          },
-          ...this.buildCategoryBlocks(space),
-          {
-            type: 'actions',
-            elements: [
-              {
-                type: 'button',
-                style: 'primary',
-                action_id: this.actionIds.addCategory,
-                text: {
-                  type: 'plain_text',
-                  text: 'Add Category',
-                },
-              },
-            ],
-          },
-        ],
-      },
+      }),
     });
   }
 
@@ -221,7 +101,7 @@ export class SpaceEditService implements SlashCommandService {
 
     const { spaceHandle, channel, userId } = JSON.parse(
       view.private_metadata
-    ) as PrivateMetadata;
+    ) as SpaceEditViewPrivateMetadata;
     logger.info(
       `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
     );
@@ -240,7 +120,8 @@ export class SpaceEditService implements SlashCommandService {
       await ack({
         response_action: 'errors',
         errors: {
-          [Object.values(this.blockIds)[0]]: 'Failed to fetch space',
+          [Object.values(this.spaceEditView.blockIds)[0]]:
+            'Failed to fetch space',
         },
       });
       return;
@@ -248,7 +129,7 @@ export class SpaceEditService implements SlashCommandService {
 
     const { inputTitle, inputDescription, inputHandle } = getValuesFromState({
       state: view.state,
-      blockIds: this.blockIds,
+      blockIds: this.spaceEditView.blockIds,
     });
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
@@ -280,7 +161,8 @@ export class SpaceEditService implements SlashCommandService {
       await ack({
         response_action: 'errors',
         errors: {
-          [Object.values(this.blockIds)[0]]: 'Failed to edit space',
+          [Object.values(this.spaceEditView.blockIds)[0]]:
+            'Failed to edit space',
         },
       });
       return;
@@ -319,47 +201,5 @@ export class SpaceEditService implements SlashCommandService {
         },
       ],
     });
-  }
-
-  private buildCategoryBlocks(space: Space): (Block | KnownBlock)[] {
-    const blocks: (Block | KnownBlock)[] = [];
-
-    space.profileCategoryConfig?.categoryItems.forEach((categoryItem) => {
-      blocks.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
-        },
-        accessory: {
-          type: 'button',
-          value: JSON.stringify(categoryItem as SpaceCategoryEditActionValue),
-          action_id: this.actionIds.editCategory,
-          text: {
-            type: 'plain_text',
-            text: 'Edit / Remove',
-            emoji: true,
-          },
-        },
-      });
-      blocks.push({
-        type: 'context',
-        elements: [
-          {
-            type: 'mrkdwn',
-            text: categoryItem.id,
-          },
-          {
-            type: 'mrkdwn',
-            text: categoryItem.color || ' ',
-          },
-        ],
-      });
-      blocks.push({
-        type: 'divider',
-      });
-    });
-
-    return blocks;
   }
 }
