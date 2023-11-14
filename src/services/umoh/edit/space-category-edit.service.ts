@@ -3,12 +3,16 @@ import {
   BlockButtonAction,
   KnownBlock,
   SlackActionMiddlewareArgs,
+  SlackViewMiddlewareArgs,
 } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
+import { app } from '../../../app';
+import { getValuesFromState } from '../../../utils/slack';
 
 export type SpaceCategoryEditActionValue = SpaceProfileCategoryItem;
 
 export class SpaceCategoryEditService {
+  private readonly callbackId = 'space-category-edit';
   private readonly blockIds = {
     inputCategoryId: 'input-category-id',
     inputCategoryColor: 'input-category-color',
@@ -17,6 +21,10 @@ export class SpaceCategoryEditService {
     inputCategoryNameVi: 'input-category-name-vi',
     inputCategoryNameZh: 'input-category-name-zh',
   };
+
+  constructor() {
+    app.view(this.callbackId, this.onCategoryEditSubmit.bind(this));
+  }
 
   async onCategoryEdit({
     action,
@@ -41,13 +49,14 @@ export class SpaceCategoryEditService {
       trigger_id: body.trigger_id,
       view: {
         type: 'modal',
+        callback_id: this.callbackId,
         title: {
           type: 'plain_text',
           text: 'Edit category',
         },
         submit: {
           type: 'plain_text',
-          text: 'Edit',
+          text: 'Confirm',
         },
         close: {
           type: 'plain_text',
@@ -134,6 +143,68 @@ export class SpaceCategoryEditService {
         ],
       },
     });
+  }
+
+  private async onCategoryEditSubmit({
+    logger,
+    view,
+    ack,
+  }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
+    logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
+
+    let values = getValuesFromState({
+      state: view.state,
+      blockIds: this.blockIds,
+    });
+    values = {
+      inputCategoryId: values.inputCategoryId?.trim(),
+      inputCategoryColor: values.inputCategoryColor?.trim(),
+      inputCategoryNameKo: values.inputCategoryNameKo?.trim(),
+      inputCategoryNameEn: values.inputCategoryNameEn?.trim(),
+      inputCategoryNameVi: values.inputCategoryNameVi?.trim(),
+      inputCategoryNameZh: values.inputCategoryNameZh?.trim(),
+    };
+    logger.info(`${new Date()} - values: ${JSON.stringify(values)}`);
+
+    if (
+      values.inputCategoryColor &&
+      !values.inputCategoryColor.match(/^#[0-9a-f]{6}$/i)
+    ) {
+      logger.info(`${new Date()} - invalid color`);
+      await ack({
+        response_action: 'errors',
+        errors: {
+          [this.blockIds.inputCategoryColor]:
+            'Color must be a hex code. e.g. #FF0000',
+        },
+      });
+      return;
+    }
+
+    if (
+      !values.inputCategoryNameKo &&
+      !values.inputCategoryNameEn &&
+      !values.inputCategoryNameVi &&
+      !values.inputCategoryNameZh
+    ) {
+      logger.info(`${new Date()} - invalid category names`);
+      await ack({
+        response_action: 'errors',
+        errors: {
+          [this.blockIds.inputCategoryNameKo]:
+            'At least one category name is required.',
+          [this.blockIds.inputCategoryNameEn]:
+            'At least one category name is required.',
+          [this.blockIds.inputCategoryNameVi]:
+            'At least one category name is required.',
+          [this.blockIds.inputCategoryNameZh]:
+            'At least one category name is required.',
+        },
+      });
+      return;
+    }
+
+    await ack();
   }
 
   private buildCategoryNameBlock(
