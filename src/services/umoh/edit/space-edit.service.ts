@@ -75,7 +75,7 @@ export class SpaceEditService implements SlashCommandService {
 
     await client.views.open({
       trigger_id: command.trigger_id,
-      view: this.spaceEditView.buildSpaceEditView({
+      view: this.spaceEditView.build({
         privateMetadata: {
           spaceHandle,
           channel: command.channel_id,

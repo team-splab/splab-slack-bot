@@ -21,7 +21,7 @@ export class SpaceEditView {
     addCategory: 'add-category',
   };
 
-  buildSpaceEditView({
+  build({
     privateMetadata,
     initialValues,
   }: {
