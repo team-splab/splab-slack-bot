@@ -27,6 +27,7 @@ export class SpaceEditView implements ViewBuilder {
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
     addCategory: 'add-category',
+    selectDefaultLanguage: 'select-default-language',
   };
 
   build({
@@ -143,6 +144,7 @@ export class SpaceEditView implements ViewBuilder {
           },
           accessory: {
             type: 'static_select',
+            action_id: this.actionIds.selectDefaultLanguage,
             initial_option: {
               value: 'ko',
               text: {

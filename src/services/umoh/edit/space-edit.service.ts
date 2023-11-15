@@ -50,6 +50,10 @@ export class SpaceEditService implements SlashCommandService {
         this.categoryCreateService
       )
     );
+    app.action(
+      this.spaceEditView.actionIds.selectDefaultLanguage,
+      async ({ ack }) => await ack()
+    );
   }
 
   async onSlashCommand({
