@@ -1,6 +1,7 @@
 import { KnownBlock, View } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
+import { getSpaceUrl } from '../../../utils/space';
 
 export interface SpaceCategoryOverflowActionValue {
   type: 'edit' | 'delete';
@@ -56,6 +57,15 @@ export class SpaceEditView implements ViewBuilder {
         text: 'Cancel',
       },
       blocks: [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `Space: <${getSpaceUrl(initialValues.handle)}|${getSpaceUrl(
+              initialValues.handle
+            )}>`,
+          },
+        },
         {
           type: 'header',
           text: {
