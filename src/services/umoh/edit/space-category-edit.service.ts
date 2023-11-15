@@ -19,13 +19,16 @@ export type SpaceCategoryEditActionValue = SpaceProfileCategoryItem;
 export class SpaceCategoryEditService {
   private readonly spaceCategoryEditView: SpaceCategoryEditView;
   private readonly spaceEditView: SpaceEditView;
+  private readonly isCreateMode: boolean;
 
   constructor(
     spaceCategoryEditView: SpaceCategoryEditView,
-    spaceEditView: SpaceEditView
+    spaceEditView: SpaceEditView,
+    isCreateMode = false
   ) {
     this.spaceCategoryEditView = spaceCategoryEditView;
     this.spaceEditView = spaceEditView;
+    this.isCreateMode = isCreateMode;
 
     app.view(
       this.spaceCategoryEditView.callbackId,
@@ -43,9 +46,7 @@ export class SpaceCategoryEditService {
     AllMiddlewareArgs): Promise<void> {
     logger.info(`${new Date()} - space category edit`);
 
-    const categoryItem = JSON.parse(
-      action.value
-    ) as SpaceCategoryEditActionValue;
+    const categoryItem: SpaceCategoryEditActionValue = JSON.parse(action.value);
     logger.info(
       `${new Date()} - category item: ${JSON.stringify(categoryItem)}`
     );
@@ -95,9 +96,7 @@ export class SpaceCategoryEditService {
       spaceEditViewId,
       spaceEditViewPrivateMetadata,
       spaceEditViewState,
-    } = JSON.parse(
-      view.private_metadata
-    ) as SpaceCategoryEditViewPrivateMetadata;
+    }: SpaceCategoryEditViewPrivateMetadata = JSON.parse(view.private_metadata);
 
     const categoryItem = this.getCategoryItemFromState(view.state);
     logger.info(`${new Date()} - values: ${JSON.stringify(categoryItem)}`);
@@ -140,10 +139,14 @@ export class SpaceCategoryEditService {
     });
 
     const categoryItems = spaceEditViewPrivateMetadata.categoryItems;
-    const categoryItemIndex = categoryItems.findIndex(
-      (categoryItem) => categoryItem.id === categoryIdToEdit
-    );
-    categoryItems[categoryItemIndex] = categoryItem;
+    if (this.isCreateMode) {
+      categoryItems.push(categoryItem);
+    } else {
+      const categoryItemIndex = categoryItems.findIndex(
+        (categoryItem) => categoryItem.id === categoryIdToEdit
+      );
+      categoryItems[categoryItemIndex] = categoryItem;
+    }
 
     await client.views.update({
       view_id: spaceEditViewId,

@@ -35,6 +35,11 @@ export class SpaceEditView implements ViewBuilder {
       categoryItems: SpaceProfileCategoryItem[];
     };
   }): View {
+    const addCategoryButtonValue: SpaceCategoryEditActionValue = {
+      id: '',
+      localizedNames: [],
+    };
+
     return {
       type: 'modal',
       callback_id: this.callbackId,
@@ -138,6 +143,7 @@ export class SpaceEditView implements ViewBuilder {
               type: 'button',
               style: 'primary',
               action_id: this.actionIds.addCategory,
+              value: JSON.stringify(addCategoryButtonValue),
               text: {
                 type: 'plain_text',
                 text: 'Add Category',
@@ -155,6 +161,7 @@ export class SpaceEditView implements ViewBuilder {
     const blocks: KnownBlock[] = [];
 
     categoryItems.forEach((categoryItem) => {
+      const value: SpaceCategoryEditActionValue = categoryItem;
       blocks.push({
         type: 'section',
         text: {
@@ -163,7 +170,7 @@ export class SpaceEditView implements ViewBuilder {
         },
         accessory: {
           type: 'button',
-          value: JSON.stringify(categoryItem as SpaceCategoryEditActionValue),
+          value: JSON.stringify(value),
           action_id: this.actionIds.editCategory,
           text: {
             type: 'plain_text',

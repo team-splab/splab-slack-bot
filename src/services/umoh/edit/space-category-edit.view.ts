@@ -11,7 +11,7 @@ export interface SpaceCategoryEditViewPrivateMetadata {
 }
 
 export class SpaceCategoryEditView implements ViewBuilder {
-  readonly callbackId = 'space-category-edit';
+  readonly callbackId;
   readonly blockIds = {
     inputCategoryId: 'input-category-id',
     inputCategoryColor: 'input-category-color',
@@ -20,6 +20,12 @@ export class SpaceCategoryEditView implements ViewBuilder {
     inputCategoryNameVi: 'input-category-name-vi',
     inputCategoryNameZh: 'input-category-name-zh',
   };
+
+  constructor(isCreateMode = false) {
+    this.callbackId = isCreateMode
+      ? 'space-category-create'
+      : 'space-category-edit';
+  }
 
   build({
     privateMetadata,

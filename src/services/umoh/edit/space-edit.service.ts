@@ -25,19 +25,26 @@ export class SpaceEditService implements SlashCommandService {
   readonly slashCommandText = 'space edit';
 
   private readonly categoryEditService: SpaceCategoryEditService;
+  private readonly categoryCreateService: SpaceCategoryEditService;
   private readonly spaceEditView: SpaceEditView;
 
   constructor(
     categoryEditService: SpaceCategoryEditService,
+    categoryCreateService: SpaceCategoryEditService,
     spaceEditView: SpaceEditView
   ) {
     this.categoryEditService = categoryEditService;
+    this.categoryCreateService = categoryCreateService;
     this.spaceEditView = spaceEditView;
 
     app.view(this.spaceEditView.callbackId, this.onModalSubmit.bind(this));
     app.action(
       this.spaceEditView.actionIds.editCategory,
       this.categoryEditService.onCategoryEdit.bind(this.categoryEditService)
+    );
+    app.action(
+      this.spaceEditView.actionIds.addCategory,
+      this.categoryCreateService.onCategoryEdit.bind(this.categoryCreateService)
     );
   }
 

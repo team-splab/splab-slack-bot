@@ -26,9 +26,19 @@ const spaceCategoryEditService = new SpaceCategoryEditService(
   spaceCategoryEditView,
   spaceEditView
 );
+const spaceCategoryCreateView = new SpaceCategoryEditView(true);
+const spaceCategoryCreateService = new SpaceCategoryEditService(
+  spaceCategoryCreateView,
+  spaceEditView,
+  true
+);
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
-  new SpaceEditService(spaceCategoryEditService, spaceEditView),
+  new SpaceEditService(
+    spaceCategoryEditService,
+    spaceCategoryCreateService,
+    spaceEditView
+  ),
 ];
 
 app.event('app_mention', async ({ event, say }) => {
