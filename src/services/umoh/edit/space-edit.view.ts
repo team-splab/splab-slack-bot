@@ -1,7 +1,11 @@
 import { KnownBlock, View } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
-import { SpaceCategoryEditActionValue } from './space-category-edit.service';
 import { ViewBuilder } from '../../../interfaces/view-builder';
+
+export interface SpaceCategoryOverflowActionValue {
+  type: 'edit' | 'delete';
+  categoryId: string;
+}
 
 export interface SpaceEditViewPrivateMetadata {
   spaceHandle: string;
@@ -35,11 +39,6 @@ export class SpaceEditView implements ViewBuilder {
       categoryItems: SpaceProfileCategoryItem[];
     };
   }): View {
-    const addCategoryButtonValue: SpaceCategoryEditActionValue = {
-      id: '',
-      localizedNames: [],
-    };
-
     return {
       type: 'modal',
       callback_id: this.callbackId,
@@ -143,7 +142,6 @@ export class SpaceEditView implements ViewBuilder {
               type: 'button',
               style: 'primary',
               action_id: this.actionIds.addCategory,
-              value: JSON.stringify(addCategoryButtonValue),
               text: {
                 type: 'plain_text',
                 text: 'Add Category',
@@ -161,7 +159,14 @@ export class SpaceEditView implements ViewBuilder {
     const blocks: KnownBlock[] = [];
 
     categoryItems.forEach((categoryItem) => {
-      const value: SpaceCategoryEditActionValue = categoryItem;
+      const editActionValue: SpaceCategoryOverflowActionValue = {
+        type: 'edit',
+        categoryId: categoryItem.id,
+      };
+      const deleteActionValue: SpaceCategoryOverflowActionValue = {
+        type: 'delete',
+        categoryId: categoryItem.id,
+      };
       blocks.push(
         {
           type: 'section',
@@ -176,10 +181,17 @@ export class SpaceEditView implements ViewBuilder {
             action_id: this.actionIds.categoryActionsOverflow,
             options: [
               {
-                value: JSON.stringify(value),
+                value: JSON.stringify(editActionValue),
                 text: {
                   type: 'plain_text',
-                  text: 'Edit',
+                  text: ':large_blue_circle: Edit',
+                },
+              },
+              {
+                value: JSON.stringify(deleteActionValue),
+                text: {
+                  type: 'plain_text',
+                  text: ':red_circle: Delete',
                 },
               },
             ],

@@ -40,7 +40,9 @@ export class SpaceEditService implements SlashCommandService {
     app.view(this.spaceEditView.callbackId, this.onModalSubmit.bind(this));
     app.action(
       this.spaceEditView.actionIds.categoryActionsOverflow,
-      this.categoryEditService.onCategoryEdit.bind(this.categoryEditService)
+      this.categoryEditService.onCategoryEditOrDelete.bind(
+        this.categoryEditService
+      )
     );
     app.action(
       this.spaceEditView.actionIds.addCategory,

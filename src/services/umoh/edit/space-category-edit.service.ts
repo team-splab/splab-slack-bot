@@ -14,9 +14,11 @@ import {
   SpaceCategoryEditView,
   SpaceCategoryEditViewPrivateMetadata,
 } from './space-category-edit.view';
-import { SpaceEditView } from './space-edit.view';
-
-export type SpaceCategoryEditActionValue = SpaceProfileCategoryItem;
+import {
+  SpaceCategoryOverflowActionValue,
+  SpaceEditView,
+  SpaceEditViewPrivateMetadata,
+} from './space-edit.view';
 
 export class SpaceCategoryEditService {
   private readonly spaceCategoryEditView: SpaceCategoryEditView;
@@ -38,55 +40,76 @@ export class SpaceCategoryEditService {
     );
   }
 
-  async onCategoryEdit(
+  async onCategoryEditOrDelete(
     args: SlackActionMiddlewareArgs<BlockOverflowAction> & AllMiddlewareArgs
   ): Promise<void> {
-    args.logger.info(`${new Date()} - space category edit`);
-    this.openModal({
-      ...args,
-      actionValue: args.action.selected_option.value,
-    });
+    const { logger, action } = args;
+    logger.info(`${new Date()} - space category edit`);
+
+    const actionValue: SpaceCategoryOverflowActionValue = JSON.parse(
+      action.selected_option.value
+    );
+
+    switch (actionValue.type) {
+      case 'edit':
+        this.openModal({
+          ...args,
+          categoryId: actionValue.categoryId,
+        });
+        break;
+      case 'delete':
+        this.onCategoryDelete(args);
+    }
   }
 
   async onCategoryCreate(
     args: SlackActionMiddlewareArgs<BlockButtonAction> & AllMiddlewareArgs
   ): Promise<void> {
-    args.logger.info(`${new Date()} - space category create`);
+    const { logger } = args;
+    logger.info(`${new Date()} - space category create`);
+
     this.openModal({
       ...args,
-      actionValue: args.action.value,
     });
   }
 
   private async openModal({
-    actionValue,
+    categoryId,
     logger,
     client,
     body,
     ack,
   }: {
-    actionValue: string;
+    categoryId?: string;
     body: BlockButtonAction | BlockOverflowAction;
     ack: AckFn<void>;
   } & AllMiddlewareArgs) {
-    const categoryItem: SpaceCategoryEditActionValue = JSON.parse(actionValue);
-    logger.info(
-      `${new Date()} - category item: ${JSON.stringify(categoryItem)}`
-    );
+    logger.info(`${new Date()} - categoryId: ${categoryId}`);
 
-    const previousView = body.view;
-    if (!previousView) {
-      logger.info(`${new Date()} - previous view not found`);
+    const spaceEditView = body.view;
+    if (!spaceEditView) {
+      logger.info(`${new Date()} - space edit view not found`);
       await ack();
       return;
     }
     logger.info(
-      `${new Date()} - previousView.private_metadata: ${
-        previousView.private_metadata
-      }\npreviousView.id: ${previousView.id}`
+      `${new Date()} - spaceEditView.private_metadata: ${
+        spaceEditView.private_metadata
+      }\nspaceEditView.id: ${spaceEditView.id}`
     );
 
     await ack();
+
+    const spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
+      JSON.parse(spaceEditView.private_metadata);
+
+    let categoryItem: SpaceProfileCategoryItem = { id: '', localizedNames: [] };
+    if (categoryId) {
+      categoryItem =
+        spaceEditViewPrivateMetadata.categoryItems.find(
+          (item) => item.id === categoryId
+        ) || categoryItem;
+    }
 
     await client.views.push({
       trigger_id: body.trigger_id,
@@ -96,11 +119,9 @@ export class SpaceCategoryEditService {
         },
         privateMetadata: {
           categoryIdToEdit: categoryItem.id,
-          spaceEditViewId: previousView.id,
-          spaceEditViewPrivateMetadata: JSON.parse(
-            previousView.private_metadata
-          ),
-          spaceEditViewState: previousView.state,
+          spaceEditViewId: spaceEditView.id,
+          spaceEditViewPrivateMetadata: spaceEditViewPrivateMetadata,
+          spaceEditViewState: spaceEditView.state,
         },
       }),
     });
@@ -176,6 +197,68 @@ export class SpaceCategoryEditService {
 
     await client.views.update({
       view_id: spaceEditViewId,
+      view: this.spaceEditView.build({
+        privateMetadata: {
+          ...spaceEditViewPrivateMetadata,
+          categoryItems,
+        },
+        initialValues: {
+          handle:
+            editViewState.inputHandle ||
+            spaceEditViewPrivateMetadata.spaceHandle,
+          title: editViewState.inputTitle || '',
+          description: editViewState.inputDescription,
+          categoryItems: categoryItems,
+        },
+      }),
+    });
+  }
+
+  private async onCategoryDelete({
+    logger,
+    action,
+    body,
+    client,
+    ack,
+  }: SlackActionMiddlewareArgs<BlockOverflowAction> & AllMiddlewareArgs) {
+    logger.info(`${new Date()} - space category delete`);
+
+    const spaceEditView = body.view;
+    if (!spaceEditView) {
+      logger.info(`${new Date()} - spaceEditView not found`);
+      await ack();
+      return;
+    }
+    logger.info(
+      `${new Date()} - spaceEditView.private_metadata: ${
+        spaceEditView.private_metadata
+      }\nspaceEditView.id: ${spaceEditView.id}`
+    );
+
+    await ack();
+
+    const actionValue: SpaceCategoryOverflowActionValue = JSON.parse(
+      action.selected_option.value
+    );
+    logger.info(`${new Date()} - actionValue: ${JSON.stringify(actionValue)}`);
+
+    const spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
+      JSON.parse(spaceEditView.private_metadata);
+
+    const categoryItems = spaceEditViewPrivateMetadata.categoryItems.filter(
+      (categoryItem) => categoryItem.id !== actionValue.categoryId
+    );
+    logger.info(
+      `${new Date()} - categoryItems: ${JSON.stringify(categoryItems)}`
+    );
+
+    const editViewState = getValuesFromState({
+      blockIds: this.spaceEditView.blockIds,
+      state: spaceEditView.state,
+    });
+
+    await client.views.update({
+      view_id: spaceEditView.id,
       view: this.spaceEditView.build({
         privateMetadata: {
           ...spaceEditViewPrivateMetadata,
