@@ -22,6 +22,7 @@ export class SpaceEditView implements ViewBuilder {
     inputHandle: 'input-handle',
     inputTitle: 'input-title',
     inputDescription: 'input-description',
+    inputDefaultLanguage: 'input-default-language',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -134,10 +135,57 @@ export class SpaceEditView implements ViewBuilder {
           },
         },
         {
+          type: 'section',
+          block_id: this.blockIds.inputDefaultLanguage,
+          text: {
+            type: 'mrkdwn',
+            text: '*Default Language*',
+          },
+          accessory: {
+            type: 'static_select',
+            initial_option: {
+              value: 'ko',
+              text: {
+                type: 'plain_text',
+                text: 'Korean',
+              },
+            },
+            options: [
+              {
+                value: 'ko',
+                text: {
+                  type: 'plain_text',
+                  text: 'Korean',
+                },
+              },
+              {
+                value: 'en',
+                text: {
+                  type: 'plain_text',
+                  text: 'English',
+                },
+              },
+              {
+                value: 'vi',
+                text: {
+                  type: 'plain_text',
+                  text: 'Vietnamese',
+                },
+              },
+              {
+                value: 'zh',
+                text: {
+                  type: 'plain_text',
+                  text: 'Taiwanese',
+                },
+              },
+            ],
+          },
+        },
+        {
           type: 'header',
           text: {
             type: 'plain_text',
-
             text: 'Categories',
           },
         },

@@ -147,18 +147,26 @@ export class SpaceEditService implements SlashCommandService {
       return;
     }
 
-    const { inputTitle, inputDescription, inputHandle } = getValuesFromState({
-      state: view.state,
-      blockIds: this.spaceEditView.blockIds,
-    });
+    const { inputTitle, inputDescription, inputHandle, inputDefaultLanguage } =
+      getValuesFromState({
+        state: view.state,
+        blockIds: this.spaceEditView.blockIds,
+      });
+
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
       handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
-      profileCategoryConfig: space.profileCategoryConfig && {
-        ...space.profileCategoryConfig,
+      profileCategoryConfig: {
+        defaultLanguage:
+          inputDefaultLanguage ||
+          space.profileCategoryConfig?.defaultLanguage ||
+          'en',
         categoryItems,
+        localizedCategoryLabels:
+          space.profileCategoryConfig?.localizedCategoryLabels || [],
+        maxItemNumber: space.profileCategoryConfig?.maxItemNumber || 1,
       },
       id: undefined,
       hostId: undefined,

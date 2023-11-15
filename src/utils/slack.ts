@@ -11,7 +11,11 @@ export const getValueFromState = ({
   state: ViewOutput['state'];
   blockId: string;
 }): string | undefined => {
-  return Object.values(state.values[blockId])[0].value ?? undefined;
+  const stateObject = Object.values(state.values[blockId])[0];
+  if (stateObject.type === 'static_select') {
+    return stateObject.selected_option?.value;
+  }
+  return stateObject.value ?? undefined;
 };
 
 /**
