@@ -1,6 +1,8 @@
 import {
+  AckFn,
   AllMiddlewareArgs,
   BlockButtonAction,
+  BlockOverflowAction,
   SlackActionMiddlewareArgs,
   SlackViewMiddlewareArgs,
   ViewOutput,
@@ -36,17 +38,38 @@ export class SpaceCategoryEditService {
     );
   }
 
-  async onCategoryEdit({
-    action,
+  async onCategoryEdit(
+    args: SlackActionMiddlewareArgs<BlockOverflowAction> & AllMiddlewareArgs
+  ): Promise<void> {
+    args.logger.info(`${new Date()} - space category edit`);
+    this.openModal({
+      ...args,
+      actionValue: args.action.selected_option.value,
+    });
+  }
+
+  async onCategoryCreate(
+    args: SlackActionMiddlewareArgs<BlockButtonAction> & AllMiddlewareArgs
+  ): Promise<void> {
+    args.logger.info(`${new Date()} - space category create`);
+    this.openModal({
+      ...args,
+      actionValue: args.action.value,
+    });
+  }
+
+  private async openModal({
+    actionValue,
     logger,
     client,
     body,
     ack,
-  }: SlackActionMiddlewareArgs<BlockButtonAction> &
-    AllMiddlewareArgs): Promise<void> {
-    logger.info(`${new Date()} - space category edit`);
-
-    const categoryItem: SpaceCategoryEditActionValue = JSON.parse(action.value);
+  }: {
+    actionValue: string;
+    body: BlockButtonAction | BlockOverflowAction;
+    ack: AckFn<void>;
+  } & AllMiddlewareArgs) {
+    const categoryItem: SpaceCategoryEditActionValue = JSON.parse(actionValue);
     logger.info(
       `${new Date()} - category item: ${JSON.stringify(categoryItem)}`
     );
@@ -147,6 +170,9 @@ export class SpaceCategoryEditService {
       );
       categoryItems[categoryItemIndex] = categoryItem;
     }
+    logger.info(
+      `${new Date()} - categoryItems: ${JSON.stringify(categoryItems)}`
+    );
 
     await client.views.update({
       view_id: spaceEditViewId,
@@ -161,7 +187,7 @@ export class SpaceCategoryEditService {
             spaceEditViewPrivateMetadata.spaceHandle,
           title: editViewState.inputTitle || '',
           description: editViewState.inputDescription,
-          categoryItems: spaceEditViewPrivateMetadata.categoryItems,
+          categoryItems: categoryItems,
         },
       }),
     });

@@ -19,7 +19,7 @@ export class SpaceEditView implements ViewBuilder {
     inputDescription: 'input-description',
   };
   readonly actionIds = {
-    editCategory: 'edit-category',
+    categoryActionsOverflow: 'category-actions-overflow',
     addCategory: 'add-category',
   };
 
@@ -162,39 +162,46 @@ export class SpaceEditView implements ViewBuilder {
 
     categoryItems.forEach((categoryItem) => {
       const value: SpaceCategoryEditActionValue = categoryItem;
-      blocks.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
-        },
-        accessory: {
-          type: 'button',
-          value: JSON.stringify(value),
-          action_id: this.actionIds.editCategory,
+      blocks.push(
+        {
+          type: 'section',
           text: {
-            type: 'plain_text',
-            text: 'Edit / Remove',
-            emoji: true,
+            type: 'mrkdwn',
+            text: categoryItem.localizedNames
+              .map(({ text }) => text)
+              .join(' | '),
+          },
+          accessory: {
+            type: 'overflow',
+            action_id: this.actionIds.categoryActionsOverflow,
+            options: [
+              {
+                value: JSON.stringify(value),
+                text: {
+                  type: 'plain_text',
+                  text: 'Edit',
+                },
+              },
+            ],
           },
         },
-      });
-      blocks.push({
-        type: 'context',
-        elements: [
-          {
-            type: 'mrkdwn',
-            text: categoryItem.id,
-          },
-          {
-            type: 'mrkdwn',
-            text: categoryItem.color || ' ',
-          },
-        ],
-      });
-      blocks.push({
-        type: 'divider',
-      });
+        {
+          type: 'context',
+          elements: [
+            {
+              type: 'mrkdwn',
+              text: categoryItem.id,
+            },
+            {
+              type: 'mrkdwn',
+              text: categoryItem.color || ' ',
+            },
+          ],
+        },
+        {
+          type: 'divider',
+        }
+      );
     });
 
     return blocks;
