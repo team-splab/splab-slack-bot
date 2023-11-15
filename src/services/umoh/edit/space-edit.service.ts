@@ -110,6 +110,7 @@ export class SpaceEditService implements SlashCommandService {
           title: space.title,
           description: space.description,
           categoryItems: space.profileCategoryConfig?.categoryItems || [],
+          defaultLanguage: space.defaultLanguage,
         },
       }),
     });
@@ -162,16 +163,17 @@ export class SpaceEditService implements SlashCommandService {
       handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
-      profileCategoryConfig: {
-        defaultLanguage:
-          inputDefaultLanguage ||
-          space.profileCategoryConfig?.defaultLanguage ||
-          'en',
-        categoryItems,
-        localizedCategoryLabels:
-          space.profileCategoryConfig?.localizedCategoryLabels || [],
-        maxItemNumber: space.profileCategoryConfig?.maxItemNumber || 1,
-      },
+      defaultLanguage: inputDefaultLanguage || space.defaultLanguage,
+      profileCategoryConfig:
+        categoryItems.length === 0
+          ? undefined
+          : {
+              defaultLanguage: inputDefaultLanguage || space.defaultLanguage,
+              categoryItems,
+              localizedCategoryLabels:
+                space.profileCategoryConfig?.localizedCategoryLabels || [],
+              maxItemNumber: space.profileCategoryConfig?.maxItemNumber || 1,
+            },
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -239,7 +241,8 @@ export class SpaceEditService implements SlashCommandService {
             text:
               `*Handle*\n@${spaceUpdated.handle}\n` +
               `*Title*\n${spaceUpdated.title}\n` +
-              `*Description*\n${spaceUpdated.description || ''}`,
+              `*Description*\n${spaceUpdated.description || ''}\n` +
+              `*Default Language*\n${spaceUpdated.defaultLanguage}`,
           },
         },
         {

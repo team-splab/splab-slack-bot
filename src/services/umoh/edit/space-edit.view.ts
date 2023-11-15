@@ -1,4 +1,4 @@
-import { KnownBlock, View } from '@slack/bolt';
+import { KnownBlock, PlainTextOption, View } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
 import { getSpaceUrl } from '../../../utils/space';
@@ -39,9 +39,40 @@ export class SpaceEditView implements ViewBuilder {
       handle: string;
       title: string;
       description?: string;
+      defaultLanguage: string;
       categoryItems: SpaceProfileCategoryItem[];
     };
   }): View {
+    const defaultLanguageOptions: PlainTextOption[] = [
+      {
+        value: 'ko',
+        text: {
+          type: 'plain_text',
+          text: 'Korean',
+        },
+      },
+      {
+        value: 'en',
+        text: {
+          type: 'plain_text',
+          text: 'English',
+        },
+      },
+      {
+        value: 'vi',
+        text: {
+          type: 'plain_text',
+          text: 'Vietnamese',
+        },
+      },
+      {
+        value: 'zh',
+        text: {
+          type: 'plain_text',
+          text: 'Taiwanese',
+        },
+      },
+    ];
     return {
       type: 'modal',
       callback_id: this.callbackId,
@@ -145,43 +176,10 @@ export class SpaceEditView implements ViewBuilder {
           accessory: {
             type: 'static_select',
             action_id: this.actionIds.selectDefaultLanguage,
-            initial_option: {
-              value: 'ko',
-              text: {
-                type: 'plain_text',
-                text: 'Korean',
-              },
-            },
-            options: [
-              {
-                value: 'ko',
-                text: {
-                  type: 'plain_text',
-                  text: 'Korean',
-                },
-              },
-              {
-                value: 'en',
-                text: {
-                  type: 'plain_text',
-                  text: 'English',
-                },
-              },
-              {
-                value: 'vi',
-                text: {
-                  type: 'plain_text',
-                  text: 'Vietnamese',
-                },
-              },
-              {
-                value: 'zh',
-                text: {
-                  type: 'plain_text',
-                  text: 'Taiwanese',
-                },
-              },
-            ],
+            initial_option: defaultLanguageOptions.find(
+              (option) => option.value === initialValues.defaultLanguage
+            ),
+            options: defaultLanguageOptions,
           },
         },
         {

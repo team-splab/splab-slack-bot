@@ -29,6 +29,7 @@ export interface Space {
   title: string;
   todayViews: number;
   description?: string;
+  defaultLanguage: string;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
 }
 

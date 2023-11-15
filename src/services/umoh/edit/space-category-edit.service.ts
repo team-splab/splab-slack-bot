@@ -209,6 +209,7 @@ export class SpaceCategoryEditService {
           title: editViewState.inputTitle || '',
           description: editViewState.inputDescription,
           categoryItems: categoryItems,
+          defaultLanguage: editViewState.inputDefaultLanguage || '',
         },
       }),
     });
@@ -271,6 +272,7 @@ export class SpaceCategoryEditService {
           title: editViewState.inputTitle || '',
           description: editViewState.inputDescription,
           categoryItems: categoryItems,
+          defaultLanguage: editViewState.inputDefaultLanguage || '',
         },
       }),
     });
