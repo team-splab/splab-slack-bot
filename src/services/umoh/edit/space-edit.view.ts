@@ -24,6 +24,7 @@ export class SpaceEditView implements ViewBuilder {
     inputTitle: 'input-title',
     inputDescription: 'input-description',
     inputDefaultLanguage: 'input-default-language',
+    inputCategorySelectPlaceholder: 'input-category-select-placeholder',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -54,6 +55,7 @@ export class SpaceEditView implements ViewBuilder {
         title: values.inputTitle || '',
         description: values.inputDescription,
         defaultLanguage: values.inputDefaultLanguage || '',
+        categorySelectPlaceholder: values.inputCategorySelectPlaceholder,
         categoryItems: categoryItems || privateMetadata.categoryItems,
       },
     });
@@ -69,6 +71,7 @@ export class SpaceEditView implements ViewBuilder {
       title: string;
       description?: string;
       defaultLanguage: string;
+      categorySelectPlaceholder?: string;
       categoryItems: SpaceProfileCategoryItem[];
     };
   }): View {
@@ -215,11 +218,36 @@ export class SpaceEditView implements ViewBuilder {
           type: 'header',
           text: {
             type: 'plain_text',
-            text: 'Categories',
+            text: 'Category Configuration',
           },
         },
         {
           type: 'divider',
+        },
+        {
+          type: 'input',
+          optional: true,
+          block_id: this.blockIds.inputCategorySelectPlaceholder,
+          label: {
+            type: 'plain_text',
+            text: 'Category select placeholder',
+          },
+          element: {
+            type: 'plain_text_input',
+            initial_value: initialValues.categorySelectPlaceholder,
+            placeholder: {
+              type: 'plain_text',
+              text: 'ex) Select a category',
+            },
+          },
+        },
+        { type: 'divider' },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '*Categories*',
+          },
         },
         ...this.buildCategoryBlocks(initialValues.categoryItems),
         {

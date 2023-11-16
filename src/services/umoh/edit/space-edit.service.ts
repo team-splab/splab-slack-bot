@@ -110,6 +110,10 @@ export class SpaceEditService implements SlashCommandService {
           title: space.title,
           description: space.description,
           categoryItems: space.profileCategoryConfig?.categoryItems || [],
+          categorySelectPlaceholder:
+            space.profileCategoryConfig?.localizedCategoryLabels.find(
+              ({ language }) => language === space.defaultLanguage
+            )?.text,
           defaultLanguage: space.defaultLanguage,
         },
       }),
@@ -152,26 +156,45 @@ export class SpaceEditService implements SlashCommandService {
       return;
     }
 
-    const { inputTitle, inputDescription, inputHandle, inputDefaultLanguage } =
-      getValuesFromState({
-        state: view.state,
-        blockIds: this.spaceEditView.blockIds,
+    const {
+      inputTitle,
+      inputDescription,
+      inputHandle,
+      inputDefaultLanguage,
+      inputCategorySelectPlaceholder,
+    } = getValuesFromState({
+      state: view.state,
+      blockIds: this.spaceEditView.blockIds,
+    });
+
+    const defaultLanguage = inputDefaultLanguage || space.defaultLanguage;
+    const localizedCategoryLabels =
+      space.profileCategoryConfig?.localizedCategoryLabels || [];
+    const label = localizedCategoryLabels.find(
+      ({ language }) => language === defaultLanguage
+    );
+    if (label) {
+      label.text = inputCategorySelectPlaceholder || '';
+    } else {
+      localizedCategoryLabels.push({
+        language: defaultLanguage,
+        text: inputCategorySelectPlaceholder || '',
       });
+    }
 
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
       handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
-      defaultLanguage: inputDefaultLanguage || space.defaultLanguage,
+      defaultLanguage,
       profileCategoryConfig:
         categoryItems.length === 0
           ? undefined
           : {
-              defaultLanguage: inputDefaultLanguage || space.defaultLanguage,
+              defaultLanguage,
               categoryItems,
-              localizedCategoryLabels:
-                space.profileCategoryConfig?.localizedCategoryLabels || [],
+              localizedCategoryLabels,
               maxItemNumber: space.profileCategoryConfig?.maxItemNumber || 1,
             },
       id: undefined,
@@ -249,11 +272,32 @@ export class SpaceEditService implements SlashCommandService {
           type: 'header',
           text: {
             type: 'plain_text',
-            text: 'Categories',
+            text: 'Category Configuration',
           },
         },
         {
           type: 'divider',
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Category Select Placeholder*\n${
+              spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
+                ({ language }) => language === spaceUpdated.defaultLanguage
+              )?.text || ''
+            }`,
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: '*Category Items*',
+          },
         },
         ...this.buildCategoryBlocks(categoryItems),
       ],
