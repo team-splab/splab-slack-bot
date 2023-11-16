@@ -114,6 +114,7 @@ export class SpaceEditService implements SlashCommandService {
             space.profileCategoryConfig?.localizedCategoryLabels.find(
               ({ language }) => language === space.defaultLanguage
             )?.text,
+          maxCategorySelections: space.profileCategoryConfig?.maxItemNumber,
           defaultLanguage: space.defaultLanguage,
         },
       }),
@@ -162,6 +163,7 @@ export class SpaceEditService implements SlashCommandService {
       inputHandle,
       inputDefaultLanguage,
       inputCategorySelectPlaceholder,
+      inputMaxCategorySelections,
     } = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
@@ -195,7 +197,9 @@ export class SpaceEditService implements SlashCommandService {
               defaultLanguage,
               categoryItems,
               localizedCategoryLabels,
-              maxItemNumber: space.profileCategoryConfig?.maxItemNumber || 1,
+              maxItemNumber: inputMaxCategorySelections
+                ? parseInt(inputMaxCategorySelections)
+                : space.profileCategoryConfig?.maxItemNumber || 1,
             },
       id: undefined,
       hostId: undefined,
@@ -282,11 +286,15 @@ export class SpaceEditService implements SlashCommandService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*Category Select Placeholder*\n${
-              spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
-                ({ language }) => language === spaceUpdated.defaultLanguage
-              )?.text || ''
-            }`,
+            text:
+              `*Category Select Placeholder*\n${
+                spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
+                  ({ language }) => language === spaceUpdated.defaultLanguage
+                )?.text || ''
+              }\n` +
+              `*Max Category Selections*\n${
+                spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
+              }`,
           },
         },
         {

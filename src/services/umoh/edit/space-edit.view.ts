@@ -25,6 +25,7 @@ export class SpaceEditView implements ViewBuilder {
     inputDescription: 'input-description',
     inputDefaultLanguage: 'input-default-language',
     inputCategorySelectPlaceholder: 'input-category-select-placeholder',
+    inputMaxCategorySelections: 'input-max-category-selections',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -56,6 +57,9 @@ export class SpaceEditView implements ViewBuilder {
         description: values.inputDescription,
         defaultLanguage: values.inputDefaultLanguage || '',
         categorySelectPlaceholder: values.inputCategorySelectPlaceholder,
+        maxCategorySelections: values.inputMaxCategorySelections
+          ? parseInt(values.inputMaxCategorySelections)
+          : undefined,
         categoryItems: categoryItems || privateMetadata.categoryItems,
       },
     });
@@ -72,6 +76,7 @@ export class SpaceEditView implements ViewBuilder {
       description?: string;
       defaultLanguage: string;
       categorySelectPlaceholder?: string;
+      maxCategorySelections?: number;
       categoryItems: SpaceProfileCategoryItem[];
     };
   }): View {
@@ -239,6 +244,22 @@ export class SpaceEditView implements ViewBuilder {
               type: 'plain_text',
               text: 'ex) Select a category',
             },
+          },
+        },
+        {
+          type: 'input',
+          optional: false,
+          block_id: this.blockIds.inputMaxCategorySelections,
+          element: {
+            type: 'number_input',
+            min_value: '1',
+            is_decimal_allowed: false,
+            initial_value:
+              initialValues.maxCategorySelections?.toString() || '1',
+          },
+          label: {
+            type: 'plain_text',
+            text: 'Maximum number of selections',
           },
         },
         { type: 'divider' },
