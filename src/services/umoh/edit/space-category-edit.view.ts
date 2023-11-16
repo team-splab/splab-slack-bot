@@ -20,9 +20,11 @@ export class SpaceCategoryEditView implements ViewBuilder {
     inputCategoryNameVi: 'input-category-name-vi',
     inputCategoryNameZh: 'input-category-name-zh',
   };
+  private readonly isCreateMode: boolean;
 
   constructor(isCreateMode = false) {
-    this.callbackId = isCreateMode
+    this.isCreateMode = isCreateMode;
+    this.callbackId = this.isCreateMode
       ? 'space-category-create'
       : 'space-category-edit';
   }
@@ -42,7 +44,7 @@ export class SpaceCategoryEditView implements ViewBuilder {
       private_metadata: JSON.stringify(privateMetadata),
       title: {
         type: 'plain_text',
-        text: 'Edit category',
+        text: this.isCreateMode ? 'Create Category' : 'Edit Category',
       },
       submit: {
         type: 'plain_text',
