@@ -1,7 +1,8 @@
-import { KnownBlock, PlainTextOption, View } from '@slack/bolt';
+import { KnownBlock, PlainTextOption, View, ViewOutput } from '@slack/bolt';
 import { SpaceProfileCategoryItem } from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
 import { getSpaceUrl } from '../../../utils/space';
+import { getValuesFromState } from '../../../utils/slack';
 
 export interface SpaceCategoryOverflowActionValue {
   type: 'edit' | 'delete';
@@ -29,6 +30,34 @@ export class SpaceEditView implements ViewBuilder {
     addCategory: 'add-category',
     selectDefaultLanguage: 'select-default-language',
   };
+
+  buildWithState({
+    privateMetadata,
+    state,
+    categoryItems,
+  }: {
+    privateMetadata: SpaceEditViewPrivateMetadata;
+    state: ViewOutput['state'];
+    categoryItems?: SpaceProfileCategoryItem[];
+  }): View {
+    const values = getValuesFromState({
+      blockIds: this.blockIds,
+      state: state,
+    });
+    return this.build({
+      privateMetadata: {
+        ...privateMetadata,
+        categoryItems: categoryItems || privateMetadata.categoryItems,
+      },
+      initialValues: {
+        handle: values.inputHandle || privateMetadata.spaceHandle,
+        title: values.inputTitle || '',
+        description: values.inputDescription,
+        defaultLanguage: values.inputDefaultLanguage || '',
+        categoryItems: categoryItems || privateMetadata.categoryItems,
+      },
+    });
+  }
 
   build({
     privateMetadata,

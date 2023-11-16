@@ -177,11 +177,6 @@ export class SpaceCategoryEditService {
 
     await ack();
 
-    const editViewState = getValuesFromState({
-      blockIds: this.spaceEditView.blockIds,
-      state: spaceEditViewState,
-    });
-
     const categoryItems = spaceEditViewPrivateMetadata.categoryItems;
     if (this.isCreateMode) {
       categoryItems.push(categoryItem);
@@ -197,20 +192,10 @@ export class SpaceCategoryEditService {
 
     await client.views.update({
       view_id: spaceEditViewId,
-      view: this.spaceEditView.build({
-        privateMetadata: {
-          ...spaceEditViewPrivateMetadata,
-          categoryItems,
-        },
-        initialValues: {
-          handle:
-            editViewState.inputHandle ||
-            spaceEditViewPrivateMetadata.spaceHandle,
-          title: editViewState.inputTitle || '',
-          description: editViewState.inputDescription,
-          categoryItems: categoryItems,
-          defaultLanguage: editViewState.inputDefaultLanguage || '',
-        },
+      view: this.spaceEditView.buildWithState({
+        privateMetadata: spaceEditViewPrivateMetadata,
+        state: spaceEditViewState,
+        categoryItems,
       }),
     });
   }
@@ -253,27 +238,12 @@ export class SpaceCategoryEditService {
       `${new Date()} - categoryItems: ${JSON.stringify(categoryItems)}`
     );
 
-    const editViewState = getValuesFromState({
-      blockIds: this.spaceEditView.blockIds,
-      state: spaceEditView.state,
-    });
-
     await client.views.update({
       view_id: spaceEditView.id,
-      view: this.spaceEditView.build({
-        privateMetadata: {
-          ...spaceEditViewPrivateMetadata,
-          categoryItems,
-        },
-        initialValues: {
-          handle:
-            editViewState.inputHandle ||
-            spaceEditViewPrivateMetadata.spaceHandle,
-          title: editViewState.inputTitle || '',
-          description: editViewState.inputDescription,
-          categoryItems: categoryItems,
-          defaultLanguage: editViewState.inputDefaultLanguage || '',
-        },
+      view: this.spaceEditView.buildWithState({
+        privateMetadata: spaceEditViewPrivateMetadata,
+        state: spaceEditView.state,
+        categoryItems,
       }),
     });
   }
