@@ -29,9 +29,6 @@ jobs:
           echo SENDTIME_USER_PW=${{ secrets.SENDTIME_USER_PW }} >> .env
       - name: Install packages
         run: yarn install --frozen-lockfile
-      - name: Sleep for 5 seconds
-        run: sleep 5s
-        shell: bash
       - name: Build
         run: yarn build
       - name: Start running
