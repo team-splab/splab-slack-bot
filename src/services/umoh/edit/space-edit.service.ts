@@ -12,6 +12,8 @@ import { app } from '../../../app';
 import {
   Space,
   SpaceProfileCategoryItem,
+  SpaceSupportedSocial,
+  SpaceSupportedSocials,
   SpaceUpdateParams,
 } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
@@ -116,6 +118,7 @@ export class SpaceEditService implements SlashCommandService {
             )?.text,
           maxCategorySelections: space.profileCategoryConfig?.maxItemNumber,
           defaultLanguage: space.defaultLanguage,
+          socialLinks: space.profileCreateConfig?.supportedSocials,
         },
       }),
     });
@@ -164,6 +167,7 @@ export class SpaceEditService implements SlashCommandService {
       inputDefaultLanguage,
       inputCategorySelectPlaceholder,
       inputMaxCategorySelections,
+      inputSocialLinks,
     } = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
@@ -190,6 +194,12 @@ export class SpaceEditService implements SlashCommandService {
       title: inputTitle || space.title,
       description: inputDescription,
       defaultLanguage,
+      profileCreateConfig: {
+        ...space.profileCreateConfig,
+        defaultLanguage,
+        supportedSocials: (inputSocialLinks?.split(',') ||
+          []) as SpaceSupportedSocial[],
+      },
       profileCategoryConfig:
         categoryItems.length === 0
           ? undefined
@@ -308,6 +318,27 @@ export class SpaceEditService implements SlashCommandService {
           },
         },
         ...this.buildCategoryBlocks(categoryItems),
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Profile Card Configuration',
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Supported Socials*\n${
+              spaceUpdated.profileCreateConfig?.supportedSocials
+                ?.map((social) => SpaceSupportedSocials[social].label)
+                .join(', ') || ''
+            }`,
+          },
+        },
       ],
     });
   }

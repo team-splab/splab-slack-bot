@@ -30,8 +30,87 @@ export interface Space {
   todayViews: number;
   description?: string;
   defaultLanguage: string;
+  profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
 }
+
+export interface SpaceProfileCreateConfig {
+  defaultLanguage: string;
+  supportedSocials?: SpaceSupportedSocial[];
+}
+
+export const SpaceSupportedSocials = {
+  LINKEDIN: {
+    id: 'LINKEDIN',
+    label: 'LinkedIn',
+  },
+  INSTAGRAM: {
+    id: 'INSTAGRAM',
+    label: 'Instagram',
+  },
+  FACEBOOK: {
+    id: 'FACEBOOK',
+    label: 'Facebook',
+  },
+  TWITTER: {
+    id: 'TWITTER',
+    label: 'Twitter',
+  },
+  GITHUB: {
+    id: 'GITHUB',
+    label: 'Github',
+  },
+  NAVER_BLOG: {
+    id: 'NAVER_BLOG',
+    label: 'Naver Blog',
+  },
+  WEBSITE: {
+    id: 'WEBSITE',
+    label: 'Website',
+  },
+  'COMPANY_VIDEO#1': {
+    id: 'COMPANY_VIDEO#1',
+    label: 'Company Video 1',
+  },
+  'COMPANY_VIDEO#2': {
+    id: 'COMPANY_VIDEO#2',
+    label: 'Company Video 2',
+  },
+  'COMPANY_VIDEO#3': {
+    id: 'COMPANY_VIDEO#3',
+    label: 'Company Video 3',
+  },
+  'COMPANY_VIDEO#4': {
+    id: 'COMPANY_VIDEO#4',
+    label: 'Company Video 4',
+  },
+  'COMPANY_VIDEO#5': {
+    id: 'COMPANY_VIDEO#5',
+    label: 'Company Video 5',
+  },
+  'COMPANY_FILE#1': {
+    id: 'COMPANY_FILE#1',
+    label: 'Company File 1',
+  },
+  'COMPANY_FILE#2': {
+    id: 'COMPANY_FILE#2',
+    label: 'Company File 2',
+  },
+  'COMPANY_FILE#3': {
+    id: 'COMPANY_FILE#3',
+    label: 'Company File 3',
+  },
+  'COMPANY_FILE#4': {
+    id: 'COMPANY_FILE#4',
+    label: 'Company File 4',
+  },
+  'COMPANY_FILE#5': {
+    id: 'COMPANY_FILE#5',
+    label: 'Company File 5',
+  },
+} as const;
+
+export type SpaceSupportedSocial = keyof typeof SpaceSupportedSocials;
 
 export interface SpaceProfileCategoryConfig {
   defaultLanguage: string;

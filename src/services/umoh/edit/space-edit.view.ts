@@ -1,5 +1,9 @@
 import { KnownBlock, PlainTextOption, View, ViewOutput } from '@slack/bolt';
-import { SpaceProfileCategoryItem } from '../../../apis/space/types';
+import {
+  SpaceProfileCategoryItem,
+  SpaceSupportedSocial,
+  SpaceSupportedSocials,
+} from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
 import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
@@ -26,6 +30,7 @@ export class SpaceEditView implements ViewBuilder {
     inputDefaultLanguage: 'input-default-language',
     inputCategorySelectPlaceholder: 'input-category-select-placeholder',
     inputMaxCategorySelections: 'input-max-category-selections',
+    inputSocialLinks: 'input-social-links',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -61,6 +66,7 @@ export class SpaceEditView implements ViewBuilder {
           ? parseInt(values.inputMaxCategorySelections)
           : undefined,
         categoryItems: categoryItems || privateMetadata.categoryItems,
+        socialLinks: values.inputSocialLinks?.split(','),
       },
     });
   }
@@ -78,6 +84,7 @@ export class SpaceEditView implements ViewBuilder {
       categorySelectPlaceholder?: string;
       maxCategorySelections?: number;
       categoryItems: SpaceProfileCategoryItem[];
+      socialLinks?: string[];
     };
   }): View {
     const defaultLanguageOptions: PlainTextOption[] = [
@@ -110,6 +117,37 @@ export class SpaceEditView implements ViewBuilder {
         },
       },
     ];
+
+    const socialOptions: PlainTextOption[] = Object.values(
+      SpaceSupportedSocials
+    ).map((social) => {
+      return {
+        text: {
+          type: 'plain_text',
+          text: social.label,
+        },
+        value: social.id,
+      };
+    });
+    let socialInitialOptions: PlainTextOption[] | undefined =
+      initialValues.socialLinks?.reduce((acc, socialLink) => {
+        const social =
+          SpaceSupportedSocials[socialLink as SpaceSupportedSocial];
+        if (social) {
+          acc.push({
+            text: {
+              type: 'plain_text',
+              text: social.label,
+            },
+            value: social.id,
+          });
+        }
+        return acc;
+      }, [] as PlainTextOption[]);
+    if (socialInitialOptions?.length === 0) {
+      socialInitialOptions = undefined;
+    }
+
     return {
       type: 'modal',
       callback_id: this.callbackId,
@@ -284,6 +322,33 @@ export class SpaceEditView implements ViewBuilder {
               },
             },
           ],
+        },
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Profile Card Configuration',
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'input',
+          block_id: this.blockIds.inputSocialLinks,
+          label: {
+            type: 'plain_text',
+            text: 'Social Links',
+          },
+          element: {
+            type: 'multi_static_select',
+            placeholder: {
+              type: 'plain_text',
+              text: 'Select social links to show on profile card',
+            },
+            initial_options: socialInitialOptions,
+            options: socialOptions,
+          },
         },
       ],
     };

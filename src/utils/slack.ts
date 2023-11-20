@@ -14,6 +14,10 @@ export const getValueFromState = ({
   const stateObject = Object.values(state.values[blockId])[0];
   if (stateObject.type === 'static_select') {
     return stateObject.selected_option?.value;
+  } else if (stateObject.type === 'multi_static_select') {
+    return stateObject.selected_options
+      ?.map((option) => option.value)
+      .join(',');
   }
   return stateObject.value ?? undefined;
 };
