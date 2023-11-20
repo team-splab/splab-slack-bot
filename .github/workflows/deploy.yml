@@ -34,4 +34,3 @@ jobs:
         run: |
           pm2 start dist/index.js --name "splab-slack-bot"
           pm2 save
-          pm2 list
