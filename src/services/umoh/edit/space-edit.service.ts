@@ -224,8 +224,9 @@ export class SpaceEditService implements SlashCommandService {
       profileCreateConfig: {
         ...space.profileCreateConfig,
         defaultLanguage,
-        supportedSocials: (inputSocialLinks?.split(',') ||
-          []) as SpaceSupportedSocial[],
+        supportedSocials: (inputSocialLinks
+          ?.split(',')
+          .filter((value) => value) || []) as SpaceSupportedSocial[],
         localizedSubtitlePlaceholders:
           localizedSubtitlePlaceholders.length === 0
             ? undefined

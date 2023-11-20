@@ -398,6 +398,7 @@ export class SpaceEditView implements ViewBuilder {
         },
         {
           type: 'input',
+          optional: true,
           block_id: this.blockIds.inputSocialLinks,
           label: {
             type: 'plain_text',
