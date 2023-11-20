@@ -83,7 +83,7 @@ export class SpaceCategoryEditView implements ViewBuilder {
           block_id: this.blockIds.inputCategoryColor,
           label: {
             type: 'plain_text',
-            text: 'Category Color',
+            text: 'Category color',
           },
           hint: {
             type: 'plain_text',

@@ -33,6 +33,7 @@ export interface Space {
   defaultLanguage: string;
   profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
+  profileSubtitleType: 'CATEGORY' | 'SUBTITLE' | 'HIDE';
 }
 
 export interface SpaceContactPoint {
@@ -43,6 +44,7 @@ export interface SpaceContactPoint {
 export interface SpaceProfileCreateConfig {
   defaultLanguage: string;
   supportedSocials?: SpaceSupportedSocial[];
+  localizedSubtitlePlaceholders?: LocalizedText[];
 }
 
 export const SpaceSupportedSocials = {

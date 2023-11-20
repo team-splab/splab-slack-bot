@@ -40,9 +40,15 @@ export const updateLocalizedTexts = (
     (localizedText) => localizedText.language === newLocalizedText.language
   );
   if (index === -1) {
-    newLocalizedTexts.push(newLocalizedText);
+    if (newLocalizedText.text) {
+      newLocalizedTexts.push(newLocalizedText);
+    }
   } else {
-    newLocalizedTexts[index] = newLocalizedText;
+    if (!newLocalizedText.text) {
+      newLocalizedTexts.splice(index, 1);
+    } else {
+      newLocalizedTexts[index] = newLocalizedText;
+    }
   }
   return newLocalizedTexts;
 };

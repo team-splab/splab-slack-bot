@@ -128,6 +128,10 @@ export class SpaceEditService implements SlashCommandService {
           maxCategorySelections: space.profileCategoryConfig?.maxItemNumber,
           defaultLanguage: space.defaultLanguage,
           socialLinks: space.profileCreateConfig?.supportedSocials,
+          subtitlePlaceholder:
+            space.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
+              ({ language }) => language === space.defaultLanguage
+            )?.text,
         },
       }),
     });
@@ -178,6 +182,7 @@ export class SpaceEditService implements SlashCommandService {
       inputCategorySelectPlaceholder,
       inputMaxCategorySelections,
       inputSocialLinks,
+      inputSubtitlePlaceholder,
     } = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
@@ -195,6 +200,13 @@ export class SpaceEditService implements SlashCommandService {
         text: inputCategorySelectPlaceholder || '',
       }
     );
+    const localizedSubtitlePlaceholders = updateLocalizedTexts(
+      space.profileCreateConfig?.localizedSubtitlePlaceholders || [],
+      {
+        language: defaultLanguage,
+        text: inputSubtitlePlaceholder || '',
+      }
+    );
 
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
@@ -208,6 +220,10 @@ export class SpaceEditService implements SlashCommandService {
         defaultLanguage,
         supportedSocials: (inputSocialLinks?.split(',') ||
           []) as SpaceSupportedSocial[],
+        localizedSubtitlePlaceholders:
+          localizedSubtitlePlaceholders.length === 0
+            ? undefined
+            : localizedSubtitlePlaceholders,
       },
       profileCategoryConfig:
         categoryItems.length === 0
@@ -220,6 +236,8 @@ export class SpaceEditService implements SlashCommandService {
                 ? parseInt(inputMaxCategorySelections)
                 : space.profileCategoryConfig?.maxItemNumber || 1,
             },
+      profileSubtitleType:
+        localizedSubtitlePlaceholders.length === 0 ? 'CATEGORY' : 'SUBTITLE',
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -296,7 +314,7 @@ export class SpaceEditService implements SlashCommandService {
                     }*\n${value}`
                 )
                 .join('\n')}\n` +
-              `*Default Language*\n${spaceUpdated.defaultLanguage}`,
+              `*Default language*\n${spaceUpdated.defaultLanguage}`,
           },
         },
         {
@@ -314,12 +332,12 @@ export class SpaceEditService implements SlashCommandService {
           text: {
             type: 'mrkdwn',
             text:
-              `*Category Select Placeholder*\n${
+              `*Category select placeholder*\n${
                 spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
                   ({ language }) => language === spaceUpdated.defaultLanguage
                 )?.text || ''
               }\n` +
-              `*Max Category Selections*\n${
+              `*Maximum number of selections*\n${
                 spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
               }`,
           },
@@ -331,7 +349,7 @@ export class SpaceEditService implements SlashCommandService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: '*Category Items*',
+            text: '*Category items*',
           },
         },
         ...this.buildCategoryBlocks(categoryItems),
@@ -349,10 +367,21 @@ export class SpaceEditService implements SlashCommandService {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*Supported Socials*\n${
+            text: `*Supported socials*\n${
               spaceUpdated.profileCreateConfig?.supportedSocials
                 ?.map((social) => SpaceSupportedSocials[social].label)
                 .join(', ') || ''
+            }`,
+          },
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Subtitle placeholder*\n${
+              spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
+                ({ language }) => language === spaceUpdated.defaultLanguage
+              )?.text || ''
             }`,
           },
         },

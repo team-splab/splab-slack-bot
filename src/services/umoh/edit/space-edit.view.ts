@@ -32,6 +32,7 @@ export class SpaceEditView implements ViewBuilder {
     inputCategorySelectPlaceholder: 'input-category-select-placeholder',
     inputMaxCategorySelections: 'input-max-category-selections',
     inputSocialLinks: 'input-social-links',
+    inputSubtitlePlaceholder: 'input-subtitle-placeholder',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -69,6 +70,7 @@ export class SpaceEditView implements ViewBuilder {
           : undefined,
         categoryItems: categoryItems || privateMetadata.categoryItems,
         socialLinks: values.inputSocialLinks?.split(','),
+        subtitlePlaceholder: values.inputSubtitlePlaceholder,
       },
     });
   }
@@ -88,6 +90,7 @@ export class SpaceEditView implements ViewBuilder {
       maxCategorySelections?: number;
       categoryItems: SpaceProfileCategoryItem[];
       socialLinks?: string[];
+      subtitlePlaceholder?: string;
     };
   }): View {
     const defaultLanguageOptions: PlainTextOption[] = [
@@ -250,7 +253,7 @@ export class SpaceEditView implements ViewBuilder {
           block_id: this.blockIds.inputContacts,
           label: {
             type: 'plain_text',
-            text: 'Contact Points',
+            text: 'Contact points',
           },
           hint: {
             type: 'plain_text',
@@ -271,7 +274,7 @@ export class SpaceEditView implements ViewBuilder {
           block_id: this.blockIds.inputDefaultLanguage,
           text: {
             type: 'mrkdwn',
-            text: '*Default Language*',
+            text: '*Default language*',
           },
           accessory: {
             type: 'static_select',
@@ -363,7 +366,7 @@ export class SpaceEditView implements ViewBuilder {
           block_id: this.blockIds.inputSocialLinks,
           label: {
             type: 'plain_text',
-            text: 'Social Links',
+            text: 'Social links',
           },
           element: {
             type: 'multi_static_select',
@@ -373,6 +376,23 @@ export class SpaceEditView implements ViewBuilder {
             },
             initial_options: socialInitialOptions,
             options: socialOptions,
+          },
+        },
+        {
+          type: 'input',
+          optional: true,
+          block_id: this.blockIds.inputSubtitlePlaceholder,
+          label: {
+            type: 'plain_text',
+            text: 'Subtitle placeholder',
+          },
+          element: {
+            type: 'plain_text_input',
+            initial_value: initialValues.subtitlePlaceholder,
+            placeholder: {
+              type: 'plain_text',
+              text: 'ex) CEO, Splab',
+            },
           },
         },
       ],
