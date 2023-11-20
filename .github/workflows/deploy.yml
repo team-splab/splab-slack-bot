@@ -7,16 +7,15 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    env:
-      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      SLACK_APP_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
-      TZ: Asia/Seoul
 
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - name: Stop pm2
+        run: |
+          pm2 stop "splab-slack-bot"
       - name: Create .env file
         run: |
           touch .env
@@ -31,7 +30,8 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Build
         run: yarn build
-      - name: Start running
+      - name: Start pm2
         run: |
-          pm2 reload "splab-slack-bot"
+          pm2 start dist/index.js --name "splab-slack-bot"
+          pm2 save
           pm2 list
