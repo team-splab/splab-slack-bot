@@ -11,6 +11,7 @@ import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
 import {
   Space,
+  SpaceBoardAccessType,
   SpaceContactPoint,
   SpaceProfileCategoryItem,
   SpaceSupportedSocial,
@@ -26,6 +27,7 @@ import {
 import { getValuesFromState } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
+import { capitalizeFirstLetter } from '../../../utils/stringUtils';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -58,7 +60,7 @@ export class SpaceEditService implements SlashCommandService {
       )
     );
     app.action(
-      this.spaceEditView.actionIds.selectDefaultLanguage,
+      this.spaceEditView.actionIds.selectIgnore,
       async ({ ack }) => await ack()
     );
   }
@@ -132,6 +134,9 @@ export class SpaceEditService implements SlashCommandService {
             space.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
               ({ language }) => language === space.defaultLanguage
             )?.text,
+          boardAccessType: space.boardConfig?.isEnabled
+            ? space.boardConfig?.accessType
+            : 'DISABLED',
         },
       }),
     });
@@ -183,6 +188,7 @@ export class SpaceEditService implements SlashCommandService {
       inputMaxCategorySelections,
       inputSocialLinks,
       inputSubtitlePlaceholder,
+      inputBoardAccessType,
     } = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
@@ -238,6 +244,13 @@ export class SpaceEditService implements SlashCommandService {
             },
       profileSubtitleType:
         localizedSubtitlePlaceholders.length === 0 ? 'CATEGORY' : 'SUBTITLE',
+      boardConfig: {
+        isEnabled: inputBoardAccessType !== 'DISABLED',
+        accessType:
+          inputBoardAccessType !== 'DISABLED'
+            ? (inputBoardAccessType as SpaceBoardAccessType)
+            : 'PRIVATE',
+      },
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -309,9 +322,7 @@ export class SpaceEditService implements SlashCommandService {
               `${spaceUpdated.contactPoints
                 .map(
                   ({ type, value }) =>
-                    `*${
-                      type.charAt(0) + type.slice(1).toLowerCase()
-                    }*\n${value}`
+                    `*${capitalizeFirstLetter(type)}*\n${value}`
                 )
                 .join('\n')}\n` +
               `*Default language*\n${spaceUpdated.defaultLanguage}`,
@@ -382,6 +393,27 @@ export class SpaceEditService implements SlashCommandService {
               spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
                 ({ language }) => language === spaceUpdated.defaultLanguage
               )?.text || ''
+            }`,
+          },
+        },
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Permission Configuration',
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*Board access type*\n${
+              spaceUpdated.boardConfig?.isEnabled
+                ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
+                : 'Disabled'
             }`,
           },
         },

@@ -33,6 +33,7 @@ export interface Space {
   defaultLanguage: string;
   profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
+  boardConfig?: SpaceBoardConfig;
   profileSubtitleType: 'CATEGORY' | 'SUBTITLE' | 'HIDE';
 }
 
@@ -138,3 +139,16 @@ export interface LocalizedText {
   language: string;
   text: string;
 }
+
+export interface SpaceBoardConfig {
+  isEnabled: boolean;
+  accessType: SpaceBoardAccessType;
+}
+
+export const SpaceBoardAccessTypes = {
+  PUBLIC: 'PUBLIC',
+  PREVIEW: 'PREVIEW',
+  PRIVATE: 'PRIVATE',
+} as const;
+
+export type SpaceBoardAccessType = keyof typeof SpaceBoardAccessTypes;

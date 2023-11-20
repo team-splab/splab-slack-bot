@@ -1,5 +1,6 @@
 import { KnownBlock, PlainTextOption, View, ViewOutput } from '@slack/bolt';
 import {
+  SpaceBoardAccessTypes,
   SpaceProfileCategoryItem,
   SpaceSupportedSocial,
   SpaceSupportedSocials,
@@ -20,6 +21,37 @@ export interface SpaceEditViewPrivateMetadata {
   categoryItems: SpaceProfileCategoryItem[];
 }
 
+export const boardPermissionOptions: PlainTextOption[] = [
+  {
+    value: 'DISABLED',
+    text: {
+      type: 'plain_text',
+      text: 'Disabled',
+    },
+  },
+  {
+    value: SpaceBoardAccessTypes.PUBLIC,
+    text: {
+      type: 'plain_text',
+      text: 'Public',
+    },
+  },
+  {
+    value: SpaceBoardAccessTypes.PREVIEW,
+    text: {
+      type: 'plain_text',
+      text: 'Preview',
+    },
+  },
+  {
+    value: SpaceBoardAccessTypes.PRIVATE,
+    text: {
+      type: 'plain_text',
+      text: 'Private',
+    },
+  },
+];
+
 export class SpaceEditView implements ViewBuilder {
   readonly callbackId = 'space-edit';
 
@@ -33,11 +65,12 @@ export class SpaceEditView implements ViewBuilder {
     inputMaxCategorySelections: 'input-max-category-selections',
     inputSocialLinks: 'input-social-links',
     inputSubtitlePlaceholder: 'input-subtitle-placeholder',
+    inputBoardAccessType: 'input-board-access-type',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
     addCategory: 'add-category',
-    selectDefaultLanguage: 'select-default-language',
+    selectIgnore: 'select-ignore',
   };
 
   buildWithState({
@@ -71,6 +104,7 @@ export class SpaceEditView implements ViewBuilder {
         categoryItems: categoryItems || privateMetadata.categoryItems,
         socialLinks: values.inputSocialLinks?.split(','),
         subtitlePlaceholder: values.inputSubtitlePlaceholder,
+        boardAccessType: values.inputBoardAccessType,
       },
     });
   }
@@ -91,6 +125,7 @@ export class SpaceEditView implements ViewBuilder {
       categoryItems: SpaceProfileCategoryItem[];
       socialLinks?: string[];
       subtitlePlaceholder?: string;
+      boardAccessType?: string;
     };
   }): View {
     const defaultLanguageOptions: PlainTextOption[] = [
@@ -278,7 +313,7 @@ export class SpaceEditView implements ViewBuilder {
           },
           accessory: {
             type: 'static_select',
-            action_id: this.actionIds.selectDefaultLanguage,
+            action_id: this.actionIds.selectIgnore,
             initial_option: defaultLanguageOptions.find(
               (option) => option.value === initialValues.defaultLanguage
             ),
@@ -393,6 +428,32 @@ export class SpaceEditView implements ViewBuilder {
               type: 'plain_text',
               text: 'ex) CEO, Splab',
             },
+          },
+        },
+        {
+          type: 'header',
+          text: {
+            type: 'plain_text',
+            text: 'Permission Configuration',
+          },
+        },
+        {
+          type: 'divider',
+        },
+        {
+          type: 'section',
+          block_id: this.blockIds.inputBoardAccessType,
+          text: {
+            type: 'mrkdwn',
+            text: 'Community forum permission',
+          },
+          accessory: {
+            type: 'static_select',
+            action_id: this.actionIds.selectIgnore,
+            initial_option: boardPermissionOptions.find(
+              (option) => option.value === initialValues.boardAccessType
+            ),
+            options: boardPermissionOptions,
           },
         },
       ],
