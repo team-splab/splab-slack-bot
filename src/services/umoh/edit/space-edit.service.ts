@@ -18,7 +18,11 @@ import {
   SpaceUpdateParams,
 } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
-import { getContactPoint, getSpaceUrl } from '../../../utils/space';
+import {
+  getContactPoint,
+  getSpaceUrl,
+  updateLocalizedTexts,
+} from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
@@ -184,19 +188,13 @@ export class SpaceEditService implements SlashCommandService {
       [];
 
     const defaultLanguage = inputDefaultLanguage || space.defaultLanguage;
-    const localizedCategoryLabels =
-      space.profileCategoryConfig?.localizedCategoryLabels || [];
-    const label = localizedCategoryLabels.find(
-      ({ language }) => language === defaultLanguage
-    );
-    if (label) {
-      label.text = inputCategorySelectPlaceholder || '';
-    } else {
-      localizedCategoryLabels.push({
+    const localizedCategoryLabels = updateLocalizedTexts(
+      space.profileCategoryConfig?.localizedCategoryLabels || [],
+      {
         language: defaultLanguage,
         text: inputCategorySelectPlaceholder || '',
-      });
-    }
+      }
+    );
 
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,

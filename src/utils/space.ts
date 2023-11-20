@@ -1,4 +1,4 @@
-import { SpaceContactPoint } from '../apis/space/types';
+import { LocalizedText, SpaceContactPoint } from '../apis/space/types';
 
 export const getSpaceUrl = (spaceHandle: string) => {
   return process.env.IS_PRODUCTION === 'true'
@@ -29,4 +29,20 @@ export const getContactPoint = (value: string): SpaceContactPoint => {
     type: 'WEBSITE',
     value: `https://${value.trim()}`,
   };
+};
+
+export const updateLocalizedTexts = (
+  localizedTexts: LocalizedText[],
+  newLocalizedText: LocalizedText
+) => {
+  const newLocalizedTexts = [...localizedTexts];
+  const index = newLocalizedTexts.findIndex(
+    (localizedText) => localizedText.language === newLocalizedText.language
+  );
+  if (index === -1) {
+    newLocalizedTexts.push(newLocalizedText);
+  } else {
+    newLocalizedTexts[index] = newLocalizedText;
+  }
+  return newLocalizedTexts;
 };
