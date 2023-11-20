@@ -446,7 +446,7 @@ export class SpaceEditView implements ViewBuilder {
           block_id: this.blockIds.inputBoardAccessType,
           text: {
             type: 'mrkdwn',
-            text: 'Community forum permission',
+            text: '*Community forum permission*',
           },
           accessory: {
             type: 'static_select',
