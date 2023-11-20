@@ -28,10 +28,16 @@ export interface Space {
   handle: string;
   title: string;
   todayViews: number;
+  contactPoints: SpaceContactPoint[];
   description?: string;
   defaultLanguage: string;
   profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
+}
+
+export interface SpaceContactPoint {
+  type: 'EMAIL' | 'PHONE' | 'WEBSITE';
+  value: string;
 }
 
 export interface SpaceProfileCreateConfig {

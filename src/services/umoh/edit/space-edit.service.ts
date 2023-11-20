@@ -11,13 +11,14 @@ import { SLASH_COMMANDS } from '../../../utils/consts';
 import { app } from '../../../app';
 import {
   Space,
+  SpaceContactPoint,
   SpaceProfileCategoryItem,
   SpaceSupportedSocial,
   SpaceSupportedSocials,
   SpaceUpdateParams,
 } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
-import { getSpaceUrl } from '../../../utils/space';
+import { getContactPoint, getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
@@ -111,6 +112,10 @@ export class SpaceEditService implements SlashCommandService {
           handle: space.handle,
           title: space.title,
           description: space.description,
+          contacts: space.contactPoints
+            .filter(({ value }) => value)
+            .map(({ value }) => value)
+            .join(', '),
           categoryItems: space.profileCategoryConfig?.categoryItems || [],
           categorySelectPlaceholder:
             space.profileCategoryConfig?.localizedCategoryLabels.find(
@@ -161,9 +166,10 @@ export class SpaceEditService implements SlashCommandService {
     }
 
     const {
+      inputHandle,
       inputTitle,
       inputDescription,
-      inputHandle,
+      inputContacts,
       inputDefaultLanguage,
       inputCategorySelectPlaceholder,
       inputMaxCategorySelections,
@@ -172,6 +178,10 @@ export class SpaceEditService implements SlashCommandService {
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
     });
+
+    const contactPoints: SpaceContactPoint[] =
+      inputContacts?.split(/[\n,]+/).map((value) => getContactPoint(value)) ||
+      [];
 
     const defaultLanguage = inputDefaultLanguage || space.defaultLanguage;
     const localizedCategoryLabels =
@@ -193,6 +203,7 @@ export class SpaceEditService implements SlashCommandService {
       handle: inputHandle || space.handle,
       title: inputTitle || space.title,
       description: inputDescription,
+      contactPoints,
       defaultLanguage,
       profileCreateConfig: {
         ...space.profileCreateConfig,
@@ -279,6 +290,14 @@ export class SpaceEditService implements SlashCommandService {
               `*Handle*\n@${spaceUpdated.handle}\n` +
               `*Title*\n${spaceUpdated.title}\n` +
               `*Description*\n${spaceUpdated.description || ''}\n` +
+              `${spaceUpdated.contactPoints
+                .map(
+                  ({ type, value }) =>
+                    `*${
+                      type.charAt(0) + type.slice(1).toLowerCase()
+                    }*\n${value}`
+                )
+                .join('\n')}\n` +
               `*Default Language*\n${spaceUpdated.defaultLanguage}`,
           },
         },

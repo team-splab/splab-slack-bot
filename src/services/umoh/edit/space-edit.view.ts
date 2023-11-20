@@ -27,6 +27,7 @@ export class SpaceEditView implements ViewBuilder {
     inputHandle: 'input-handle',
     inputTitle: 'input-title',
     inputDescription: 'input-description',
+    inputContacts: 'input-contacts',
     inputDefaultLanguage: 'input-default-language',
     inputCategorySelectPlaceholder: 'input-category-select-placeholder',
     inputMaxCategorySelections: 'input-max-category-selections',
@@ -60,6 +61,7 @@ export class SpaceEditView implements ViewBuilder {
         handle: values.inputHandle || privateMetadata.spaceHandle,
         title: values.inputTitle || '',
         description: values.inputDescription,
+        contacts: values.inputContacts,
         defaultLanguage: values.inputDefaultLanguage || '',
         categorySelectPlaceholder: values.inputCategorySelectPlaceholder,
         maxCategorySelections: values.inputMaxCategorySelections
@@ -80,6 +82,7 @@ export class SpaceEditView implements ViewBuilder {
       handle: string;
       title: string;
       description?: string;
+      contacts?: string;
       defaultLanguage: string;
       categorySelectPlaceholder?: string;
       maxCategorySelections?: number;
@@ -238,6 +241,28 @@ export class SpaceEditView implements ViewBuilder {
             placeholder: {
               type: 'plain_text',
               text: 'Space description',
+            },
+          },
+        },
+        {
+          type: 'input',
+          optional: true,
+          block_id: this.blockIds.inputContacts,
+          label: {
+            type: 'plain_text',
+            text: 'Contact Points',
+          },
+          hint: {
+            type: 'plain_text',
+            text: 'Enter emails, phone numbers, or URLs separated by commas, or new lines. The order will be preserved.',
+          },
+          element: {
+            type: 'plain_text_input',
+            initial_value: initialValues.contacts,
+            multiline: true,
+            placeholder: {
+              type: 'plain_text',
+              text: 'ex) email@splab.dev, 010-1234-5678, https://umoh.io, https://join.umoh.io/kr',
             },
           },
         },
