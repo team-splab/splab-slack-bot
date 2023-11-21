@@ -21,37 +21,6 @@ export interface SpaceEditViewPrivateMetadata {
   categoryItems: SpaceProfileCategoryItem[];
 }
 
-export const boardPermissionOptions: PlainTextOption[] = [
-  {
-    value: 'DISABLED',
-    text: {
-      type: 'plain_text',
-      text: 'Disabled',
-    },
-  },
-  {
-    value: SpaceBoardAccessTypes.PUBLIC,
-    text: {
-      type: 'plain_text',
-      text: 'Public',
-    },
-  },
-  {
-    value: SpaceBoardAccessTypes.PREVIEW,
-    text: {
-      type: 'plain_text',
-      text: 'Preview',
-    },
-  },
-  {
-    value: SpaceBoardAccessTypes.PRIVATE,
-    text: {
-      type: 'plain_text',
-      text: 'Private',
-    },
-  },
-];
-
 export class SpaceEditView implements ViewBuilder {
   readonly callbackId = 'space-edit';
 
@@ -188,6 +157,37 @@ export class SpaceEditView implements ViewBuilder {
     if (socialInitialOptions?.length === 0) {
       socialInitialOptions = undefined;
     }
+
+    const boardPermissionOptions: PlainTextOption[] = [
+      {
+        value: 'DISABLED',
+        text: {
+          type: 'plain_text',
+          text: 'Disabled',
+        },
+      },
+      {
+        value: SpaceBoardAccessTypes.PUBLIC,
+        text: {
+          type: 'plain_text',
+          text: 'Public',
+        },
+      },
+      {
+        value: SpaceBoardAccessTypes.PREVIEW,
+        text: {
+          type: 'plain_text',
+          text: 'Preview',
+        },
+      },
+      {
+        value: SpaceBoardAccessTypes.PRIVATE,
+        text: {
+          type: 'plain_text',
+          text: 'Private',
+        },
+      },
+    ];
 
     return {
       type: 'modal',
