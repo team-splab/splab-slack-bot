@@ -24,7 +24,7 @@ import {
   getSpaceUrl,
   updateLocalizedTexts,
 } from '../../../utils/space';
-import { getValuesFromState } from '../../../utils/slack';
+import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
 import { capitalizeFirstLetter } from '../../../utils/stringUtils';
@@ -288,11 +288,130 @@ export class SpaceEditService implements SlashCommandService {
       response_action: 'clear',
     });
 
-    await client.chat.postMessage({
+    const blocks = [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: 'Basic Information',
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            `*Handle*\n@${spaceUpdated.handle}\n` +
+            `*Title*\n${spaceUpdated.title}\n` +
+            `*Description*\n${spaceUpdated.description || ''}\n` +
+            `${spaceUpdated.contactPoints
+              .map(
+                ({ type, value }) =>
+                  `*${capitalizeFirstLetter(type)}*\n${value}`
+              )
+              .join('\n')}\n` +
+            `*Default language*\n${spaceUpdated.defaultLanguage}`,
+        },
+      },
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: 'Category Configuration',
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text:
+            `*Category select placeholder*\n${
+              spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
+                ({ language }) => language === spaceUpdated.defaultLanguage
+              )?.text || ''
+            }\n` +
+            `*Maximum number of selections*\n${
+              spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
+            }`,
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '*Category items*',
+        },
+      },
+      ...this.buildCategoryBlocks(categoryItems),
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: 'Profile Card Configuration',
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Supported socials*\n${
+            spaceUpdated.profileCreateConfig?.supportedSocials
+              ?.map((social) => SpaceSupportedSocials[social].label)
+              .join(', ') || ''
+          }`,
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Subtitle placeholder*\n${
+            spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
+              ({ language }) => language === spaceUpdated.defaultLanguage
+            )?.text || ''
+          }`,
+        },
+      },
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: 'Permission Configuration',
+        },
+      },
+      {
+        type: 'divider',
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Board access type*\n${
+            spaceUpdated.boardConfig?.isEnabled
+              ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
+              : 'Disabled'
+          }`,
+        },
+      },
+    ];
+
+    await postBlocksInThread({
+      client,
       channel: channel,
-      mrkdwn: true,
-      text: `@${spaceUpdated.handle} has been edited by <@${userId}>`,
-      blocks: [
+      messageText: `@${spaceUpdated.handle} has been edited by <@${userId}>`,
+      messageBlocks: [
         {
           type: 'section',
           text: {
@@ -302,123 +421,8 @@ export class SpaceEditService implements SlashCommandService {
             }>* has been edited by <@${userId}>`,
           },
         },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Basic Information',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text:
-              `*Handle*\n@${spaceUpdated.handle}\n` +
-              `*Title*\n${spaceUpdated.title}\n` +
-              `*Description*\n${spaceUpdated.description || ''}\n` +
-              `${spaceUpdated.contactPoints
-                .map(
-                  ({ type, value }) =>
-                    `*${capitalizeFirstLetter(type)}*\n${value}`
-                )
-                .join('\n')}\n` +
-              `*Default language*\n${spaceUpdated.defaultLanguage}`,
-          },
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Category Configuration',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text:
-              `*Category select placeholder*\n${
-                spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
-                  ({ language }) => language === spaceUpdated.defaultLanguage
-                )?.text || ''
-              }\n` +
-              `*Maximum number of selections*\n${
-                spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
-              }`,
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*Category items*',
-          },
-        },
-        ...this.buildCategoryBlocks(categoryItems),
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Profile Card Configuration',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*Supported socials*\n${
-              spaceUpdated.profileCreateConfig?.supportedSocials
-                ?.map((social) => SpaceSupportedSocials[social].label)
-                .join(', ') || ''
-            }`,
-          },
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*Subtitle placeholder*\n${
-              spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
-                ({ language }) => language === spaceUpdated.defaultLanguage
-              )?.text || ''
-            }`,
-          },
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Permission Configuration',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*Board access type*\n${
-              spaceUpdated.boardConfig?.isEnabled
-                ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
-                : 'Disabled'
-            }`,
-          },
-        },
       ],
+      threadBlocks: blocks,
     });
   }
 

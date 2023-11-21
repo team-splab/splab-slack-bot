@@ -1,4 +1,4 @@
-import { ViewOutput } from '@slack/bolt';
+import { AllMiddlewareArgs, Block, KnownBlock, ViewOutput } from '@slack/bolt';
 
 /**
  * Get value from state
@@ -38,4 +38,44 @@ export const getValuesFromState = <T extends { [key: string]: string }>({
     values[key as keyof T] = getValueFromState({ state, blockId });
   }
   return values;
+};
+
+export const postBlocksInThread = async ({
+  client,
+  channel,
+  messageText,
+  messageBlocks,
+  threadBlocks,
+}: {
+  client: AllMiddlewareArgs['client'];
+  channel: string;
+  messageText: string;
+  messageBlocks?: (KnownBlock | Block)[];
+  threadBlocks: (KnownBlock | Block)[];
+}) => {
+  const messageResponse = await client.chat.postMessage({
+    channel: channel,
+    mrkdwn: true,
+    messageText,
+    blocks: messageBlocks,
+  });
+  const blockSplits = threadBlocks.reduce(
+    (acc, block) => {
+      if (acc[acc.length - 1].length >= 50) {
+        acc.push([]);
+      }
+      acc[acc.length - 1].push(block);
+      return acc;
+    },
+    [[]] as (KnownBlock | Block)[][]
+  );
+
+  for (const blocks of blockSplits) {
+    await client.chat.postMessage({
+      channel: channel,
+      mrkdwn: true,
+      thread_ts: messageResponse.ts,
+      blocks,
+    });
+  }
 };
