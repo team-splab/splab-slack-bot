@@ -184,6 +184,7 @@ export class SpaceEditView implements ViewBuilder {
     return {
       type: 'modal',
       callback_id: this.callbackId,
+      notify_on_close: true,
       title: {
         type: 'plain_text',
         text: 'Edit Space',

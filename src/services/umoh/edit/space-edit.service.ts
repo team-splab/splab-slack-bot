@@ -28,7 +28,11 @@ import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
 import { capitalizeFirstLetter } from '../../../utils/stringUtils';
-import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
+import {
+  deletePrivateMetadata,
+  getPrivateMetadata,
+  savePrivateMetadata,
+} from '../../../utils/redis';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -48,6 +52,18 @@ export class SpaceEditService implements SlashCommandService {
     this.spaceEditView = spaceEditView;
 
     app.view(this.spaceEditView.callbackId, this.onModalSubmit.bind(this));
+    app.view(
+      {
+        type: 'view_closed',
+        callback_id: this.spaceEditView.callbackId,
+      },
+      async ({ ack, view, logger }) => {
+        logger.info(`${new Date()} - ${view.callback_id} modal closed`);
+        await ack();
+        await deletePrivateMetadata({ viewId: view.id });
+      }
+    );
+
     app.action(
       this.spaceEditView.actionIds.categoryActionsOverflow,
       this.categoryEditService.onCategoryEditOrDelete.bind(
@@ -438,6 +454,8 @@ export class SpaceEditService implements SlashCommandService {
       ],
       threadBlocks: blocks,
     });
+
+    await deletePrivateMetadata({ viewId: view.id });
   }
 
   private buildCategoryBlocks(

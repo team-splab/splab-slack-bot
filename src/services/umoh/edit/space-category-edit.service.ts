@@ -19,7 +19,11 @@ import {
   SpaceEditView,
   SpaceEditViewPrivateMetadata,
 } from './space-edit.view';
-import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
+import {
+  deletePrivateMetadata,
+  getPrivateMetadata,
+  savePrivateMetadata,
+} from '../../../utils/redis';
 
 export class SpaceCategoryEditService {
   private readonly spaceCategoryEditView: SpaceCategoryEditView;
@@ -38,6 +42,17 @@ export class SpaceCategoryEditService {
     app.view(
       this.spaceCategoryEditView.callbackId,
       this.onCategoryEditSubmit.bind(this)
+    );
+    app.view(
+      {
+        type: 'view_closed',
+        callback_id: this.spaceCategoryEditView.callbackId,
+      },
+      async ({ ack, view, logger }) => {
+        logger.info(`${new Date()} - ${view.callback_id} modal closed`);
+        await ack();
+        await deletePrivateMetadata({ viewId: view.id });
+      }
     );
   }
 
@@ -215,6 +230,8 @@ export class SpaceCategoryEditService {
         categoryItems,
       }),
     });
+
+    await deletePrivateMetadata({ viewId: view.id });
   }
 
   private async onCategoryDelete({

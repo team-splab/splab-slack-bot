@@ -39,6 +39,7 @@ export class SpaceCategoryEditView implements ViewBuilder {
     return {
       type: 'modal',
       callback_id: this.callbackId,
+      notify_on_close: true,
       title: {
         type: 'plain_text',
         text: this.isCreateMode ? 'Create Category' : 'Edit Category',
