@@ -84,7 +84,7 @@ export const SpacePermissions: Record<string, SpacePermission> = {
     },
   },
   PRIVATE_APPROVAL_REQUIRED: {
-    label: 'Private (Approval Required)',
+    label: 'Private (Approval required)',
     value: 'PRIVATE_APPROVAL_REQUIRED',
     criteria: {
       isAccessLimitedToOnlyCardOwners: true,
@@ -93,7 +93,7 @@ export const SpacePermissions: Record<string, SpacePermission> = {
     },
   },
   PRIVATE_APPROVAL_NOT_REQUIRED: {
-    label: 'Private (Approval Not Required)',
+    label: 'Private (Approval not required)',
     value: 'PRIVATE_APPROVAL_NOT_REQUIRED',
     criteria: {
       isAccessLimitedToOnlyCardOwners: true,
