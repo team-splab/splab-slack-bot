@@ -6,7 +6,7 @@ import {
   SpaceSupportedSocials,
 } from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
-import { getSpaceUrl } from '../../../utils/space';
+import { getSpaceUrl, SpacePermissions } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 
 export interface SpaceCategoryOverflowActionValue {
@@ -34,6 +34,7 @@ export class SpaceEditView implements ViewBuilder {
     inputMaxCategorySelections: 'input-max-category-selections',
     inputSocialLinks: 'input-social-links',
     inputSubtitlePlaceholder: 'input-subtitle-placeholder',
+    inputSpacePermission: 'input-space-permission',
     inputBoardAccessType: 'input-board-access-type',
   };
   readonly actionIds = {
@@ -86,6 +87,7 @@ export class SpaceEditView implements ViewBuilder {
       categoryItems: SpaceProfileCategoryItem[];
       socialLinks?: string[];
       subtitlePlaceholder?: string;
+      spacePermission?: string;
       boardAccessType?: string;
     };
   }): View {
@@ -149,6 +151,16 @@ export class SpaceEditView implements ViewBuilder {
     if (socialInitialOptions?.length === 0) {
       socialInitialOptions = undefined;
     }
+
+    const spacePermissionOptions: PlainTextOption[] = Object.values(
+      SpacePermissions
+    ).map((permission) => ({
+      value: permission.value,
+      text: {
+        type: 'plain_text',
+        text: permission.label,
+      },
+    }));
 
     const boardPermissionOptions: PlainTextOption[] = [
       {
@@ -432,6 +444,22 @@ export class SpaceEditView implements ViewBuilder {
         },
         {
           type: 'divider',
+        },
+        {
+          type: 'section',
+          block_id: this.blockIds.inputSpacePermission,
+          text: {
+            type: 'mrkdwn',
+            text: '*Space permission*',
+          },
+          accessory: {
+            type: 'static_select',
+            action_id: this.actionIds.selectIgnore,
+            initial_option: spacePermissionOptions.find(
+              (option) => option.value === initialValues.spacePermission
+            ),
+            options: spacePermissionOptions,
+          },
         },
         {
           type: 'section',

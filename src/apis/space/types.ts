@@ -35,6 +35,9 @@ export interface Space {
   profileCategoryConfig?: SpaceProfileCategoryConfig;
   boardConfig?: SpaceBoardConfig;
   profileSubtitleType: 'CATEGORY' | 'SUBTITLE' | 'HIDE';
+  isAccessLimitedToOnlyCardOwners: boolean;
+  isFullyPrivate: boolean;
+  defaultProfileVisible: boolean;
 }
 
 export interface SpaceContactPoint {

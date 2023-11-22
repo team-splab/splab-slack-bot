@@ -20,8 +20,11 @@ import {
 } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
 import {
+  SpacePermissionType,
   getContactPoint,
+  getSpacePermissionValue,
   getSpaceUrl,
+  SpacePermissions,
   updateLocalizedTexts,
 } from '../../../utils/space';
 import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
@@ -148,6 +151,7 @@ export class SpaceEditService implements SlashCommandService {
           boardAccessType: space.boardConfig?.isEnabled
             ? space.boardConfig?.accessType
             : 'DISABLED',
+          spacePermission: getSpacePermissionValue(space).value,
         },
       }),
     });
@@ -218,6 +222,7 @@ export class SpaceEditService implements SlashCommandService {
       inputMaxCategorySelections,
       inputSocialLinks,
       inputSubtitlePlaceholder,
+      inputSpacePermission,
       inputBoardAccessType,
     } = getValuesFromState({
       state: view.state,
@@ -243,6 +248,9 @@ export class SpaceEditService implements SlashCommandService {
         text: inputSubtitlePlaceholder || '',
       }
     );
+
+    const spacePermission =
+      SpacePermissions[inputSpacePermission as SpacePermissionType];
 
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
@@ -282,6 +290,7 @@ export class SpaceEditService implements SlashCommandService {
             ? (inputBoardAccessType as SpaceBoardAccessType)
             : 'PRIVATE',
       },
+      ...spacePermission.criteria,
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -428,11 +437,15 @@ export class SpaceEditService implements SlashCommandService {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*Board access type*\n${
-            spaceUpdated.boardConfig?.isEnabled
-              ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
-              : 'Disabled'
-          }`,
+          text:
+            `*Space permission*\n${
+              getSpacePermissionValue(spaceUpdated).label
+            }\n` +
+            `*Board access type*\n${
+              spaceUpdated.boardConfig?.isEnabled
+                ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
+                : 'Disabled'
+            }`,
         },
       },
     ];
