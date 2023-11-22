@@ -38,6 +38,8 @@ export interface Space {
   isAccessLimitedToOnlyCardOwners: boolean;
   isFullyPrivate: boolean;
   defaultProfileVisible: boolean;
+  isNeedMessaging: boolean;
+  messagingOption: SpaceMessagingOption;
 }
 
 export interface SpaceContactPoint {
@@ -155,3 +157,11 @@ export const SpaceBoardAccessTypes = {
 } as const;
 
 export type SpaceBoardAccessType = keyof typeof SpaceBoardAccessTypes;
+
+export const SpaceMessagingOptions = {
+  DISABLED: 'DISABLED',
+  ENABLED_WITHOUT_AUTH: 'ENABLED_WITHOUT_AUTH',
+  ENABLED_WITH_AUTH: 'ENABLED_WITH_AUTH',
+} as const;
+
+export type SpaceMessagingOption = keyof typeof SpaceMessagingOptions;

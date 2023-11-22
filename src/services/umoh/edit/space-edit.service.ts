@@ -13,6 +13,7 @@ import {
   Space,
   SpaceBoardAccessType,
   SpaceContactPoint,
+  SpaceMessagingOption,
   SpaceProfileCategoryItem,
   SpaceSupportedSocial,
   SpaceSupportedSocials,
@@ -29,7 +30,11 @@ import {
 } from '../../../utils/space';
 import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
-import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
+import {
+  SpaceEditView,
+  SpaceEditViewPrivateMetadata,
+  spaceMessagingPermissionOptions,
+} from './space-edit.view';
 import { capitalizeFirstLetter } from '../../../utils/stringUtils';
 import {
   deletePrivateMetadata,
@@ -148,10 +153,11 @@ export class SpaceEditService implements SlashCommandService {
             space.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
               ({ language }) => language === space.defaultLanguage
             )?.text,
+          spacePermission: getSpacePermissionValue(space).value,
+          messagingPermission: space.messagingOption,
           boardAccessType: space.boardConfig?.isEnabled
             ? space.boardConfig?.accessType
             : 'DISABLED',
-          spacePermission: getSpacePermissionValue(space).value,
         },
       }),
     });
@@ -223,6 +229,7 @@ export class SpaceEditService implements SlashCommandService {
       inputSocialLinks,
       inputSubtitlePlaceholder,
       inputSpacePermission,
+      inputMessagingPermission,
       inputBoardAccessType,
     } = getValuesFromState({
       state: view.state,
@@ -291,6 +298,8 @@ export class SpaceEditService implements SlashCommandService {
             : 'PRIVATE',
       },
       ...spacePermission.criteria,
+      isNeedMessaging: inputMessagingPermission !== 'DISABLED',
+      messagingOption: inputMessagingPermission as SpaceMessagingOption,
       id: undefined,
       hostId: undefined,
       hosts: undefined,
@@ -438,10 +447,13 @@ export class SpaceEditService implements SlashCommandService {
         text: {
           type: 'mrkdwn',
           text:
-            `*Space permission*\n${
-              getSpacePermissionValue(spaceUpdated).label
+            `*Space*\n${getSpacePermissionValue(spaceUpdated).label}\n` +
+            `*Messaging*\n${
+              spaceMessagingPermissionOptions.find(
+                ({ value }) => value === spaceUpdated.messagingOption
+              )?.text.text
             }\n` +
-            `*Board access type*\n${
+            `*Community forum*\n${
               spaceUpdated.boardConfig?.isEnabled
                 ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
                 : 'Disabled'

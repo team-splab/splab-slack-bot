@@ -1,6 +1,7 @@
 import { KnownBlock, PlainTextOption, View, ViewOutput } from '@slack/bolt';
 import {
   SpaceBoardAccessTypes,
+  SpaceMessagingOptions,
   SpaceProfileCategoryItem,
   SpaceSupportedSocial,
   SpaceSupportedSocials,
@@ -21,6 +22,30 @@ export interface SpaceEditViewPrivateMetadata {
   categoryItems: SpaceProfileCategoryItem[];
 }
 
+export const spaceMessagingPermissionOptions: PlainTextOption[] = [
+  {
+    value: SpaceMessagingOptions.DISABLED,
+    text: {
+      type: 'plain_text',
+      text: 'Disabled',
+    },
+  },
+  {
+    value: SpaceMessagingOptions.ENABLED_WITH_AUTH,
+    text: {
+      type: 'plain_text',
+      text: 'Enabled',
+    },
+  },
+  {
+    value: SpaceMessagingOptions.ENABLED_WITHOUT_AUTH,
+    text: {
+      type: 'plain_text',
+      text: 'Enabled (Login not required)',
+    },
+  },
+];
+
 export class SpaceEditView implements ViewBuilder {
   readonly callbackId = 'space-edit';
 
@@ -35,6 +60,7 @@ export class SpaceEditView implements ViewBuilder {
     inputSocialLinks: 'input-social-links',
     inputSubtitlePlaceholder: 'input-subtitle-placeholder',
     inputSpacePermission: 'input-space-permission',
+    inputMessagingPermission: 'input-messaging-permission',
     inputBoardAccessType: 'input-board-access-type',
   };
   readonly actionIds = {
@@ -68,6 +94,7 @@ export class SpaceEditView implements ViewBuilder {
         categoryItems: categoryItems || [],
         socialLinks: values.inputSocialLinks?.split(','),
         subtitlePlaceholder: values.inputSubtitlePlaceholder,
+        messagingPermission: values.inputMessagingPermission,
         boardAccessType: values.inputBoardAccessType,
       },
     });
@@ -88,6 +115,7 @@ export class SpaceEditView implements ViewBuilder {
       socialLinks?: string[];
       subtitlePlaceholder?: string;
       spacePermission?: string;
+      messagingPermission?: string;
       boardAccessType?: string;
     };
   }): View {
@@ -450,7 +478,7 @@ export class SpaceEditView implements ViewBuilder {
           block_id: this.blockIds.inputSpacePermission,
           text: {
             type: 'mrkdwn',
-            text: '*Space permission*',
+            text: '*Space*',
           },
           accessory: {
             type: 'static_select',
@@ -463,10 +491,27 @@ export class SpaceEditView implements ViewBuilder {
         },
         {
           type: 'section',
+          block_id: this.blockIds.inputMessagingPermission,
+          text: {
+            type: 'mrkdwn',
+            text: '*Messaging*',
+          },
+          accessory: {
+            type: 'static_select',
+
+            action_id: this.actionIds.selectIgnore,
+            initial_option: spaceMessagingPermissionOptions.find(
+              (option) => option.value === initialValues.messagingPermission
+            ),
+            options: spaceMessagingPermissionOptions,
+          },
+        },
+        {
+          type: 'section',
           block_id: this.blockIds.inputBoardAccessType,
           text: {
             type: 'mrkdwn',
-            text: '*Community forum permission*',
+            text: '*Community forum*',
           },
           accessory: {
             type: 'static_select',
