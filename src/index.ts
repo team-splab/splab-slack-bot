@@ -12,6 +12,7 @@ import initMenuNotificationService from './services/menu-notification';
 import { SpaceCategoryEditService } from './services/umoh/edit/space-category-edit.service';
 import { SpaceEditView } from './services/umoh/edit/space-edit.view';
 import { SpaceCategoryEditView } from './services/umoh/edit/space-category-edit.view';
+import { redisClient } from './redis';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ initUmohServices(
 initMenuNotificationService(menuNotificationService, menuSelectService);
 
 (async () => {
+  await redisClient.connect();
   await app.start();
   console.log('⚡️ Bolt app started');
 })();

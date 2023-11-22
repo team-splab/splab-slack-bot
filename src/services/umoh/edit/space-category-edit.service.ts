@@ -19,6 +19,7 @@ import {
   SpaceEditView,
   SpaceEditViewPrivateMetadata,
 } from './space-edit.view';
+import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
 
 export class SpaceCategoryEditService {
   private readonly spaceCategoryEditView: SpaceCategoryEditView;
@@ -101,7 +102,7 @@ export class SpaceCategoryEditService {
     await ack();
 
     const spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
-      JSON.parse(spaceEditView.private_metadata);
+      await getPrivateMetadata({ viewId: spaceEditView.id });
 
     let categoryItem: SpaceProfileCategoryItem = { id: '', localizedNames: [] };
     if (categoryId) {
@@ -111,20 +112,28 @@ export class SpaceCategoryEditService {
         ) || categoryItem;
     }
 
-    await client.views.push({
+    const viewRes = await client.views.push({
       trigger_id: body.trigger_id,
       view: this.spaceCategoryEditView.build({
         initialValues: {
           categoryItem,
         },
-        privateMetadata: {
-          categoryIdToEdit: categoryItem.id,
-          spaceEditViewId: spaceEditView.id,
-          spaceEditViewPrivateMetadata: spaceEditViewPrivateMetadata,
-          spaceEditViewState: spaceEditView.state,
-        },
       }),
     });
+
+    const viewId = viewRes.view?.id;
+    if (!viewId) {
+      logger.error(`${new Date()} - viewId is not provided`);
+      return;
+    }
+
+    const privateMetadata: SpaceCategoryEditViewPrivateMetadata = {
+      categoryIdToEdit: categoryItem.id,
+      spaceEditViewId: spaceEditView.id,
+      spaceEditViewPrivateMetadata: spaceEditViewPrivateMetadata,
+      spaceEditViewState: spaceEditView.state,
+    };
+    await savePrivateMetadata({ viewId, privateMetadata });
   }
 
   private async onCategoryEditSubmit({
@@ -140,7 +149,9 @@ export class SpaceCategoryEditService {
       spaceEditViewId,
       spaceEditViewPrivateMetadata,
       spaceEditViewState,
-    }: SpaceCategoryEditViewPrivateMetadata = JSON.parse(view.private_metadata);
+    }: SpaceCategoryEditViewPrivateMetadata = await getPrivateMetadata({
+      viewId: view.id,
+    });
 
     const categoryItem = this.getCategoryItemFromState(view.state);
     logger.info(`${new Date()} - values: ${JSON.stringify(categoryItem)}`);
@@ -190,10 +201,16 @@ export class SpaceCategoryEditService {
       `${new Date()} - categoryItems: ${JSON.stringify(categoryItems)}`
     );
 
+    await savePrivateMetadata({
+      viewId: spaceEditViewId,
+      privateMetadata: {
+        ...spaceEditViewPrivateMetadata,
+        categoryItems,
+      } as SpaceEditViewPrivateMetadata,
+    });
     await client.views.update({
       view_id: spaceEditViewId,
       view: this.spaceEditView.buildWithState({
-        privateMetadata: spaceEditViewPrivateMetadata,
         state: spaceEditViewState,
         categoryItems,
       }),
@@ -228,20 +245,28 @@ export class SpaceCategoryEditService {
     );
     logger.info(`${new Date()} - actionValue: ${JSON.stringify(actionValue)}`);
 
-    const spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
-      JSON.parse(spaceEditView.private_metadata);
-
+    let spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
+      await getPrivateMetadata({ viewId: spaceEditView.id });
     const categoryItems = spaceEditViewPrivateMetadata.categoryItems.filter(
       (categoryItem) => categoryItem.id !== actionValue.categoryId
     );
+    spaceEditViewPrivateMetadata = {
+      ...spaceEditViewPrivateMetadata,
+      categoryItems,
+    };
     logger.info(
-      `${new Date()} - categoryItems: ${JSON.stringify(categoryItems)}`
+      `${new Date()} - categoryItems: ${JSON.stringify(
+        spaceEditViewPrivateMetadata.categoryItems
+      )}`
     );
 
+    await savePrivateMetadata({
+      viewId: spaceEditView.id,
+      privateMetadata: spaceEditViewPrivateMetadata,
+    });
     await client.views.update({
       view_id: spaceEditView.id,
       view: this.spaceEditView.buildWithState({
-        privateMetadata: spaceEditViewPrivateMetadata,
         state: spaceEditView.state,
         categoryItems,
       }),

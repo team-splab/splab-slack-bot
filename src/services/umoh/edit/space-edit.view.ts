@@ -43,11 +43,9 @@ export class SpaceEditView implements ViewBuilder {
   };
 
   buildWithState({
-    privateMetadata,
     state,
     categoryItems,
   }: {
-    privateMetadata: SpaceEditViewPrivateMetadata;
     state: ViewOutput['state'];
     categoryItems?: SpaceProfileCategoryItem[];
   }): View {
@@ -56,12 +54,8 @@ export class SpaceEditView implements ViewBuilder {
       state: state,
     });
     return this.build({
-      privateMetadata: {
-        ...privateMetadata,
-        categoryItems: categoryItems || privateMetadata.categoryItems,
-      },
       initialValues: {
-        handle: values.inputHandle || privateMetadata.spaceHandle,
+        handle: values.inputHandle || '',
         title: values.inputTitle || '',
         description: values.inputDescription,
         contacts: values.inputContacts,
@@ -70,7 +64,7 @@ export class SpaceEditView implements ViewBuilder {
         maxCategorySelections: values.inputMaxCategorySelections
           ? parseInt(values.inputMaxCategorySelections)
           : undefined,
-        categoryItems: categoryItems || privateMetadata.categoryItems,
+        categoryItems: categoryItems || [],
         socialLinks: values.inputSocialLinks?.split(','),
         subtitlePlaceholder: values.inputSubtitlePlaceholder,
         boardAccessType: values.inputBoardAccessType,
@@ -79,10 +73,8 @@ export class SpaceEditView implements ViewBuilder {
   }
 
   build({
-    privateMetadata,
     initialValues,
   }: {
-    privateMetadata: SpaceEditViewPrivateMetadata;
     initialValues: {
       handle: string;
       title: string;
@@ -192,7 +184,6 @@ export class SpaceEditView implements ViewBuilder {
     return {
       type: 'modal',
       callback_id: this.callbackId,
-      private_metadata: JSON.stringify(privateMetadata),
       title: {
         type: 'plain_text',
         text: 'Edit Space',

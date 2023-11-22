@@ -28,6 +28,7 @@ import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
 import { SpaceCategoryEditService } from './space-category-edit.service';
 import { SpaceEditView, SpaceEditViewPrivateMetadata } from './space-edit.view';
 import { capitalizeFirstLetter } from '../../../utils/stringUtils';
+import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -105,15 +106,9 @@ export class SpaceEditService implements SlashCommandService {
 
     await ack({ response_type: 'in_channel' });
 
-    await client.views.open({
+    const viewRes = await client.views.open({
       trigger_id: command.trigger_id,
       view: this.spaceEditView.build({
-        privateMetadata: {
-          spaceHandle,
-          channel: command.channel_id,
-          userId: command.user_id,
-          categoryItems: space.profileCategoryConfig?.categoryItems || [],
-        },
         initialValues: {
           handle: space.handle,
           title: space.title,
@@ -140,6 +135,20 @@ export class SpaceEditService implements SlashCommandService {
         },
       }),
     });
+
+    const viewId = viewRes.view?.id;
+    if (!viewId) {
+      logger.error(`${new Date()} - viewId is not provided`);
+      return;
+    }
+
+    const privateMetadata: SpaceEditViewPrivateMetadata = {
+      spaceHandle,
+      channel: command.channel_id,
+      userId: command.user_id,
+      categoryItems: space.profileCategoryConfig?.categoryItems || [],
+    };
+    await savePrivateMetadata({ viewId, privateMetadata });
   }
 
   async onModalSubmit({
@@ -150,9 +159,14 @@ export class SpaceEditService implements SlashCommandService {
   }: SlackViewMiddlewareArgs & AllMiddlewareArgs) {
     logger.info(`${new Date()} - ${view.callback_id} modal submitted`);
 
-    const { spaceHandle, channel, userId, categoryItems } = JSON.parse(
-      view.private_metadata
-    ) as SpaceEditViewPrivateMetadata;
+    const {
+      spaceHandle,
+      channel,
+      userId,
+      categoryItems,
+    }: SpaceEditViewPrivateMetadata = await getPrivateMetadata({
+      viewId: view.id,
+    });
     logger.info(
       `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
     );

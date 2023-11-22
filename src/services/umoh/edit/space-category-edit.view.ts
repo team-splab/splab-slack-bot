@@ -30,10 +30,8 @@ export class SpaceCategoryEditView implements ViewBuilder {
   }
 
   build({
-    privateMetadata,
     initialValues,
   }: {
-    privateMetadata: SpaceCategoryEditViewPrivateMetadata;
     initialValues: {
       categoryItem: SpaceProfileCategoryItem;
     };
@@ -41,7 +39,6 @@ export class SpaceCategoryEditView implements ViewBuilder {
     return {
       type: 'modal',
       callback_id: this.callbackId,
-      private_metadata: JSON.stringify(privateMetadata),
       title: {
         type: 'plain_text',
         text: this.isCreateMode ? 'Create Category' : 'Edit Category',
