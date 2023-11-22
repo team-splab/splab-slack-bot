@@ -26,6 +26,7 @@ jobs:
           echo SENDTIME_API_URL=https://api.sendtime.app >> .env
           echo SENDTIME_USER_ID=${{ secrets.SENDTIME_USER_ID }} >> .env
           echo SENDTIME_USER_PW=${{ secrets.SENDTIME_USER_PW }} >> .env
+          echo REDIS_URL=${{ secrets.REDIS_URL }} >> .env
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Build
