@@ -1,4 +1,11 @@
-import { LocalizedText, Space, SpaceContactPoint } from '../apis/space/types';
+import Color from 'color';
+import {
+  LocalizedText,
+  Space,
+  SpaceContactPoint,
+  SpaceProfileCategoryItem,
+} from '../apis/space/types';
+import { shuffle } from './array';
 
 export const getSpaceUrl = (spaceHandle: string) => {
   return process.env.IS_PRODUCTION === 'true'
@@ -122,4 +129,23 @@ export const getSpacePermissionValue = (
     });
   });
   return spacePermission || SpacePermissions.CUSTOM;
+};
+
+export const fillCategoryColorsRandomly = (
+  categoryItems: SpaceProfileCategoryItem[]
+): SpaceProfileCategoryItem[] => {
+  let colors: (string | undefined)[] = categoryItems.map((item) => item.color);
+
+  const startColor = Color.hsv(Math.random() * 360, 73, 75);
+  const rotationDegree = colors.length > 1 ? 360 / colors.length : 0;
+  for (let i = 0; i < colors.length; i++) {
+    const newColor = startColor.rotate(rotationDegree * i);
+    colors[i] = newColor.hex();
+  }
+  colors = shuffle(colors);
+
+  return categoryItems.map((item, index) => ({
+    ...item,
+    color: colors[index],
+  }));
 };

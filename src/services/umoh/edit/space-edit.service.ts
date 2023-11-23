@@ -85,6 +85,12 @@ export class SpaceEditService implements SlashCommandService {
       )
     );
     app.action(
+      this.spaceEditView.actionIds.fillCategoryColors,
+      this.categoryCreateService.onFillCategoryColors.bind(
+        this.categoryCreateService
+      )
+    );
+    app.action(
       this.spaceEditView.actionIds.selectIgnore,
       async ({ ack }) => await ack()
     );

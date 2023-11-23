@@ -66,6 +66,7 @@ export class SpaceEditView implements ViewBuilder {
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
     addCategory: 'add-category',
+    fillCategoryColors: 'fill-category-colors',
     selectIgnore: 'select-ignore',
   };
 
@@ -414,6 +415,32 @@ export class SpaceEditView implements ViewBuilder {
               text: {
                 type: 'plain_text',
                 text: 'Add Category',
+              },
+            },
+            {
+              type: 'button',
+              action_id: this.actionIds.fillCategoryColors,
+              confirm: {
+                title: {
+                  type: 'plain_text',
+                  text: 'This will reset all category colors.',
+                },
+                text: {
+                  type: 'plain_text',
+                  text: 'Are you sure?',
+                },
+                confirm: {
+                  type: 'plain_text',
+                  text: 'Yes',
+                },
+                deny: {
+                  type: 'plain_text',
+                  text: 'No',
+                },
+              },
+              text: {
+                type: 'plain_text',
+                text: 'Fill colors randomly',
               },
             },
           ],

@@ -24,6 +24,7 @@ import {
   getPrivateMetadata,
   savePrivateMetadata,
 } from '../../../utils/redis';
+import { fillCategoryColorsRandomly } from '../../../utils/space';
 
 export class SpaceCategoryEditService {
   private readonly spaceCategoryEditView: SpaceCategoryEditView;
@@ -336,5 +337,45 @@ export class SpaceCategoryEditService {
       color: values.inputCategoryColor,
       localizedNames: localizedNames,
     };
+  }
+
+  async onFillCategoryColors({
+    logger,
+    client,
+    body,
+    ack,
+  }: SlackActionMiddlewareArgs<BlockButtonAction> &
+    AllMiddlewareArgs): Promise<void> {
+    logger.info(`${new Date()} - space category fill colors`);
+
+    const spaceEditView = body.view;
+    if (!spaceEditView) {
+      logger.info(`${new Date()} - spaceEditView not found`);
+      await ack();
+      return;
+    }
+
+    let spaceEditViewPrivateMetadata: SpaceEditViewPrivateMetadata =
+      await getPrivateMetadata({ viewId: spaceEditView.id });
+    const categoryItems = fillCategoryColorsRandomly(
+      spaceEditViewPrivateMetadata.categoryItems
+    );
+
+    await savePrivateMetadata({
+      viewId: spaceEditView.id,
+      privateMetadata: {
+        ...spaceEditViewPrivateMetadata,
+        categoryItems,
+      } as SpaceEditViewPrivateMetadata,
+    });
+    await client.views.update({
+      view_id: spaceEditView.id,
+      view: this.spaceEditView.buildWithState({
+        state: spaceEditView.state,
+        categoryItems,
+      }),
+    });
+
+    await ack();
   }
 }
