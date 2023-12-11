@@ -1,7 +1,6 @@
 import Color from 'color';
 import {
   LocalizedText,
-  Space,
   SpaceContactPoint,
   SpaceProfileCategoryItem,
 } from '../apis/space/types';

@@ -10,6 +10,7 @@ import { ViewBuilder } from '../../../interfaces/view-builder';
 import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 import { SpacePermissions } from '../../../utils/space-permission';
+import { SpaceImageShapes } from '../../../utils/space-image-shape';
 
 export interface SpaceCategoryOverflowActionValue {
   type: 'edit' | 'delete';
@@ -55,6 +56,7 @@ export class SpaceEditView implements ViewBuilder {
     inputTitle: 'input-title',
     inputDescription: 'input-description',
     inputContacts: 'input-contacts',
+    inputImageShape: 'input-image-shape',
     inputDefaultLanguage: 'input-default-language',
     inputCategorySelectPlaceholder: 'input-category-select-placeholder',
     inputMaxCategorySelections: 'input-max-category-selections',
@@ -88,6 +90,7 @@ export class SpaceEditView implements ViewBuilder {
         title: values.inputTitle || '',
         description: values.inputDescription,
         contacts: values.inputContacts,
+        imageShape: values.inputImageShape || '',
         defaultLanguage: values.inputDefaultLanguage || '',
         categorySelectPlaceholder: values.inputCategorySelectPlaceholder,
         maxCategorySelections: values.inputMaxCategorySelections
@@ -110,6 +113,7 @@ export class SpaceEditView implements ViewBuilder {
       title: string;
       description?: string;
       contacts?: string;
+      imageShape: string;
       defaultLanguage: string;
       categorySelectPlaceholder?: string;
       maxCategorySelections?: number;
@@ -151,6 +155,18 @@ export class SpaceEditView implements ViewBuilder {
         },
       },
     ];
+
+    const imageShapeOptions: PlainTextOption[] = Object.values(
+      SpaceImageShapes
+    ).map((shape) => {
+      return {
+        value: shape.value,
+        text: {
+          type: 'plain_text',
+          text: shape.label,
+        },
+      };
+    });
 
     const socialOptions: PlainTextOption[] = Object.values(
       SpaceSupportedSocials
@@ -336,6 +352,22 @@ export class SpaceEditView implements ViewBuilder {
               type: 'plain_text',
               text: 'ex) email@splab.dev, 010-1234-5678, https://umoh.io, https://join.umoh.io/kr',
             },
+          },
+        },
+        {
+          type: 'section',
+          block_id: this.blockIds.inputImageShape,
+          text: {
+            type: 'mrkdwn',
+            text: '*Image Shape*',
+          },
+          accessory: {
+            type: 'static_select',
+            action_id: this.actionIds.selectIgnore,
+            initial_option: imageShapeOptions.find(
+              (option) => option.value === initialValues.imageShape
+            ),
+            options: imageShapeOptions,
           },
         },
         {

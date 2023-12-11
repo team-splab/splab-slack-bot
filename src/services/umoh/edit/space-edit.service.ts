@@ -43,6 +43,11 @@ import {
   SpacePermissions,
   getSpacePermissionValue,
 } from '../../../utils/space-permission';
+import {
+  SpaceImageShapeType,
+  SpaceImageShapes,
+  getSpaceImageShapeValue,
+} from '../../../utils/space-image-shape';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -155,6 +160,7 @@ export class SpaceEditService implements SlashCommandService {
               ({ language }) => language === space.defaultLanguage
             )?.text,
           maxCategorySelections: space.profileCategoryConfig?.maxItemNumber,
+          imageShape: getSpaceImageShapeValue(space).value,
           defaultLanguage: space.defaultLanguage,
           socialLinks: space.profileCreateConfig?.supportedSocials,
           subtitlePlaceholder:
@@ -231,6 +237,7 @@ export class SpaceEditService implements SlashCommandService {
       inputTitle,
       inputDescription,
       inputContacts,
+      inputImageShape,
       inputDefaultLanguage,
       inputCategorySelectPlaceholder,
       inputMaxCategorySelections,
@@ -247,6 +254,8 @@ export class SpaceEditService implements SlashCommandService {
     const contactPoints: SpaceContactPoint[] =
       inputContacts?.split(/[\n,]+/).map((value) => getContactPoint(value)) ||
       [];
+
+    const imageShape = SpaceImageShapes[inputImageShape as SpaceImageShapeType];
 
     const defaultLanguage = inputDefaultLanguage || space.defaultLanguage;
     const localizedCategoryLabels = updateLocalizedTexts(
@@ -273,6 +282,7 @@ export class SpaceEditService implements SlashCommandService {
       title: inputTitle || space.title,
       description: inputDescription,
       contactPoints,
+      ...imageShape.criteria,
       defaultLanguage,
       profileCreateConfig: {
         ...space.profileCreateConfig,
@@ -369,6 +379,7 @@ export class SpaceEditService implements SlashCommandService {
                   `*${capitalizeFirstLetter(type)}*\n${value}`
               )
               .join('\n')}\n` +
+            `*Image shape*\n${getSpaceImageShapeValue(spaceUpdated).label}\n` +
             `*Default language*\n${spaceUpdated.defaultLanguage}`,
         },
       },

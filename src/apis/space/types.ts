@@ -30,6 +30,7 @@ export interface Space {
   todayViews: number;
   contactPoints: SpaceContactPoint[];
   description?: string;
+  imageConfig?: SpaceImageConfig;
   defaultLanguage: string;
   profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
@@ -45,6 +46,13 @@ export interface Space {
 export interface SpaceContactPoint {
   type: 'EMAIL' | 'PHONE' | 'WEBSITE';
   value: string;
+}
+
+export interface SpaceImageConfig {
+  fitType?: string;
+  borderRadius?: number;
+  width?: string;
+  height?: string;
 }
 
 export interface SpaceProfileCreateConfig {
