@@ -481,10 +481,20 @@ export class SpaceEditService implements SlashCommandService {
       },
     ];
 
+    const userProfileResponse = await client.users.profile.get({
+      user: userId,
+    });
+    logger.info(
+      `${new Date()} - user profile: ${JSON.stringify(userProfileResponse)}`
+    );
+    const userDisplayName =
+      userProfileResponse.profile?.display_name ||
+      userProfileResponse.profile?.real_name;
+
     await postBlocksInThread({
       client,
       channel: channel,
-      messageText: `@${spaceUpdated.handle} has been edited by <@${userId}>`,
+      messageText: `@${spaceUpdated.handle} has been edited by ${userDisplayName}`,
       messageBlocks: [
         {
           type: 'section',
@@ -492,7 +502,7 @@ export class SpaceEditService implements SlashCommandService {
             type: 'mrkdwn',
             text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
               spaceUpdated.handle
-            }>* has been edited by <@${userId}>`,
+            }>* has been edited by *${userDisplayName}*`,
           },
         },
       ],
