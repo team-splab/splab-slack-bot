@@ -7,8 +7,9 @@ import {
   SpaceSupportedSocials,
 } from '../../../apis/space/types';
 import { ViewBuilder } from '../../../interfaces/view-builder';
-import { getSpaceUrl, SpacePermissions } from '../../../utils/space';
+import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
+import { SpacePermissions } from '../../../utils/space-permission';
 
 export interface SpaceCategoryOverflowActionValue {
   type: 'edit' | 'delete';

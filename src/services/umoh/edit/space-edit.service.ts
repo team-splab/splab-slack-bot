@@ -21,11 +21,8 @@ import {
 } from '../../../apis/space/types';
 import { SpaceApi } from '../../../apis/space';
 import {
-  SpacePermissionType,
   getContactPoint,
-  getSpacePermissionValue,
   getSpaceUrl,
-  SpacePermissions,
   updateLocalizedTexts,
 } from '../../../utils/space';
 import { getValuesFromState, postBlocksInThread } from '../../../utils/slack';
@@ -41,6 +38,11 @@ import {
   getPrivateMetadata,
   savePrivateMetadata,
 } from '../../../utils/redis';
+import {
+  SpacePermissionType,
+  SpacePermissions,
+  getSpacePermissionValue,
+} from '../../../utils/space-permission';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
