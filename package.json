@@ -16,8 +16,7 @@
     "dotenv": "^16.0.3",
     "lodash": "^4.17.21",
     "node-cron": "^3.0.2",
-    "redis": "^4.6.11",
-    "redis-server": "^1.2.2"
+    "redis": "^4.6.11"
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
