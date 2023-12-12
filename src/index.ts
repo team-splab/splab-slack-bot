@@ -13,6 +13,8 @@ import { SpaceCategoryEditService } from './services/umoh/edit/space-category-ed
 import { SpaceEditView } from './services/umoh/edit/space-edit.view';
 import { SpaceCategoryEditView } from './services/umoh/edit/space-category-edit.view';
 import { redisClient } from './redis';
+import { SpaceNotiReactionService } from './services/umoh/noti/space-noti-reaction.service';
+import { SpaceNotiScrapService } from './services/umoh/noti/space-noti-scrap.service';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ const spaceCategoryCreateService = new SpaceCategoryEditService(
   spaceEditView,
   true
 );
+const spaceNotiReactionService = new SpaceNotiReactionService();
+const spaceNotiScrapService = new SpaceNotiScrapService();
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
   new SpaceEditService(
@@ -40,6 +44,8 @@ const slashCommandServices: SlashCommandService[] = [
     spaceCategoryCreateService,
     spaceEditView
   ),
+  spaceNotiReactionService,
+  spaceNotiScrapService,
 ];
 
 app.event('app_mention', async ({ event, say }) => {
