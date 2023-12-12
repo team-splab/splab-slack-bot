@@ -12,6 +12,7 @@ import {
   getPrivateMetadata,
   savePrivateMetadata,
 } from '../../../utils/redis';
+import { SpaceEngagingApi } from '../../../apis/space/engaging';
 
 interface PrivateMetadata {
   spaceHandle: string;
@@ -63,7 +64,7 @@ export class SpaceNotiScrapService implements SlashCommandService {
         data: {
           results: [response],
         },
-      } = await SpaceApi.getEngagingByScrap(spaceHandle);
+      } = await SpaceEngagingApi.getEngagingByScrap(spaceHandle);
       logger.info(
         `${new Date()} - noti: ${response.type} / ${response.spaceHandle}`
       );
@@ -177,7 +178,7 @@ export class SpaceNotiScrapService implements SlashCommandService {
     );
 
     try {
-      await SpaceApi.sendEngagingByScrap(spaceHandle);
+      await SpaceEngagingApi.sendEngagingByScrap(spaceHandle);
       logger.info(`${new Date()} - engaging(Scrap) Email, SMS sent`);
     } catch (error) {
       logger.error(`${new Date()} - error: ${error}`);

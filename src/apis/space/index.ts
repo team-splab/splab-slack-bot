@@ -1,7 +1,6 @@
 import { sendtimeApi } from '../../utils/api';
 import { SendtimeApiResponse } from '../types';
 import {
-  SpaceEngagingEvent,
   SpaceHostsResponse,
   SpaceHostsUpdateParams,
   SpaceResponse,
@@ -29,26 +28,6 @@ export const SpaceApi = {
     return sendtimeApi.put<SendtimeApiResponse<SpaceResponse>>(
       `/v2/space/${spaceHandle}`,
       params
-    );
-  },
-  getEngagingByReaction: (spaceHandle: string) => {
-    return sendtimeApi.get<SendtimeApiResponse<SpaceEngagingEvent>>(
-      `/v2/admin/space/${spaceHandle}/popular/reaction`
-    );
-  },
-  getEngagingByScrap: (spaceHandle: string) => {
-    return sendtimeApi.get<SendtimeApiResponse<SpaceEngagingEvent>>(
-      `/v2/admin/space/${spaceHandle}/popular/scrap`
-    );
-  },
-  sendEngagingByReaction: (spaceHandle: string) => {
-    return sendtimeApi.post<SendtimeApiResponse<Boolean>>(
-      `/v2/admin/space/${spaceHandle}/popular/reaction`
-    );
-  },
-  sendEngagingByScrap: (spaceHandle: string) => {
-    return sendtimeApi.post<SendtimeApiResponse<Boolean>>(
-      `/v2/admin/space/${spaceHandle}/popular/scrap`
     );
   },
 };
