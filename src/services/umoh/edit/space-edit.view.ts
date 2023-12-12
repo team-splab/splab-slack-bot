@@ -11,6 +11,8 @@ import { getSpaceUrl } from '../../../utils/space';
 import { getValuesFromState } from '../../../utils/slack';
 import { SpacePermissions } from '../../../utils/space-permission';
 import { SpaceImageShapes } from '../../../utils/space-image-shape';
+import { Block } from '../../../components/blocks';
+import { Element } from '../../../components/elements';
 
 export interface SpaceCategoryOverflowActionValue {
   type: 'edit' | 'delete';
@@ -128,31 +130,19 @@ export class SpaceEditView implements ViewBuilder {
     const defaultLanguageOptions: PlainTextOption[] = [
       {
         value: 'ko',
-        text: {
-          type: 'plain_text',
-          text: 'Korean',
-        },
+        text: Element.PlainText('Korean'),
       },
       {
         value: 'en',
-        text: {
-          type: 'plain_text',
-          text: 'English',
-        },
+        text: Element.PlainText('English'),
       },
       {
         value: 'vi',
-        text: {
-          type: 'plain_text',
-          text: 'Vietnamese',
-        },
+        text: Element.PlainText('Vietnamese'),
       },
       {
         value: 'zh',
-        text: {
-          type: 'plain_text',
-          text: 'Taiwanese',
-        },
+        text: Element.PlainText('Taiwanese'),
       },
     ];
 
@@ -161,10 +151,7 @@ export class SpaceEditView implements ViewBuilder {
     ).map((shape) => {
       return {
         value: shape.value,
-        text: {
-          type: 'plain_text',
-          text: shape.label,
-        },
+        text: Element.PlainText(shape.label),
       };
     });
 
@@ -172,70 +159,46 @@ export class SpaceEditView implements ViewBuilder {
       SpaceSupportedSocials
     ).map((social) => {
       return {
-        text: {
-          type: 'plain_text',
-          text: social.label,
-        },
+        text: Element.PlainText(social.label),
         value: social.id,
       };
     });
-    let socialInitialOptions: PlainTextOption[] | undefined =
+    let socialInitialValues: string[] | undefined =
       initialValues.socialLinks?.reduce((acc, socialLink) => {
         const social =
           SpaceSupportedSocials[socialLink as SpaceSupportedSocial];
         if (social) {
-          acc.push({
-            text: {
-              type: 'plain_text',
-              text: social.label,
-            },
-            value: social.id,
-          });
+          acc.push(social.id);
         }
         return acc;
-      }, [] as PlainTextOption[]);
-    if (socialInitialOptions?.length === 0) {
-      socialInitialOptions = undefined;
+      }, [] as string[]);
+    if (socialInitialValues?.length === 0) {
+      socialInitialValues = undefined;
     }
 
     const spacePermissionOptions: PlainTextOption[] = Object.values(
       SpacePermissions
     ).map((permission) => ({
       value: permission.value,
-      text: {
-        type: 'plain_text',
-        text: permission.label,
-      },
+      text: Element.PlainText(permission.label),
     }));
 
     const boardPermissionOptions: PlainTextOption[] = [
       {
         value: 'DISABLED',
-        text: {
-          type: 'plain_text',
-          text: 'Disabled',
-        },
+        text: Element.PlainText('Disabled'),
       },
       {
         value: SpaceBoardAccessTypes.PUBLIC,
-        text: {
-          type: 'plain_text',
-          text: 'Public',
-        },
+        text: Element.PlainText('Public'),
       },
       {
         value: SpaceBoardAccessTypes.PREVIEW,
-        text: {
-          type: 'plain_text',
-          text: 'Preview',
-        },
+        text: Element.PlainText('Preview'),
       },
       {
         value: SpaceBoardAccessTypes.PRIVATE,
-        text: {
-          type: 'plain_text',
-          text: 'Private',
-        },
+        text: Element.PlainText('Private'),
       },
     ];
 
@@ -243,345 +206,138 @@ export class SpaceEditView implements ViewBuilder {
       type: 'modal',
       callback_id: this.callbackId,
       notify_on_close: true,
-      title: {
-        type: 'plain_text',
-        text: 'Edit Space',
-      },
-      submit: {
-        type: 'plain_text',
-        text: 'Edit',
-      },
-      close: {
-        type: 'plain_text',
-        text: 'Cancel',
-      },
+      title: Element.PlainText('Edit Space'),
+      submit: Element.PlainText('Edit'),
+      close: Element.PlainText('Cancel'),
       blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `Space: <${getSpaceUrl(initialValues.handle)}|${getSpaceUrl(
-              initialValues.handle
-            )}>`,
-          },
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Basic Information',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'input',
-          optional: false,
-          block_id: this.blockIds.inputHandle,
-          label: {
-            type: 'plain_text',
-            text: 'Handle',
-          },
-          hint: {
-            type: 'plain_text',
-            text: 'Space handle without @',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.handle,
-            focus_on_load: true,
-            placeholder: {
-              type: 'plain_text',
-              text: 'Space handle without @',
-            },
-          },
-        },
-        {
-          type: 'input',
-          optional: false,
-          block_id: this.blockIds.inputTitle,
-          label: {
-            type: 'plain_text',
-            text: 'Title',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.title,
-            placeholder: {
-              type: 'plain_text',
-              text: 'Space title',
-            },
-          },
-        },
-        {
-          type: 'input',
+        Block.Text(
+          `Space: <${getSpaceUrl(initialValues.handle)}|${getSpaceUrl(
+            initialValues.handle
+          )}>`
+        ),
+        Block.Header('Basic Information'),
+        Block.Divider(),
+        Block.TextInput({
+          label: 'Handle',
+          hint: 'Space handle without @',
+          placeholder: 'Space handle without @',
+          initialValue: initialValues.handle,
+          blockId: this.blockIds.inputHandle,
+          focusOnLoad: true,
+        }),
+        Block.TextInput({
+          label: 'Title',
+          placeholder: 'Space title',
+          initialValue: initialValues.title,
+          blockId: this.blockIds.inputTitle,
+        }),
+        Block.TextInput({
+          label: 'Description',
+          placeholder: 'Space description',
+          initialValue: initialValues.description,
+          blockId: this.blockIds.inputDescription,
           optional: true,
-          block_id: this.blockIds.inputDescription,
-          label: {
-            type: 'plain_text',
-            text: 'Description',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.description,
-            multiline: true,
-            placeholder: {
-              type: 'plain_text',
-              text: 'Space description',
-            },
-          },
-        },
-        {
-          type: 'input',
+          multiline: true,
+        }),
+        Block.TextInput({
+          label: 'Contact points',
+          hint: 'Enter emails, phone numbers, or URLs separated by commas, or new lines. The order will be preserved.',
+          placeholder:
+            'ex) email@splab.dev, 010-1234-5678, https://umoh.io, https://join.umoh.io/kr',
+          initialValue: initialValues.contacts,
+          blockId: this.blockIds.inputContacts,
           optional: true,
-          block_id: this.blockIds.inputContacts,
-          label: {
-            type: 'plain_text',
-            text: 'Contact points',
-          },
-          hint: {
-            type: 'plain_text',
-            text: 'Enter emails, phone numbers, or URLs separated by commas, or new lines. The order will be preserved.',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.contacts,
-            multiline: true,
-            placeholder: {
-              type: 'plain_text',
-              text: 'ex) email@splab.dev, 010-1234-5678, https://umoh.io, https://join.umoh.io/kr',
-            },
-          },
-        },
-        {
-          type: 'section',
-          block_id: this.blockIds.inputImageShape,
-          text: {
-            type: 'mrkdwn',
-            text: '*Image Shape*',
-          },
-          accessory: {
-            type: 'static_select',
-            action_id: this.actionIds.selectIgnore,
-            initial_option: imageShapeOptions.find(
-              (option) => option.value === initialValues.imageShape
-            ),
-            options: imageShapeOptions,
-          },
-        },
-        {
-          type: 'section',
-          block_id: this.blockIds.inputDefaultLanguage,
-          text: {
-            type: 'mrkdwn',
-            text: '*Default language*',
-          },
-          accessory: {
-            type: 'static_select',
-            action_id: this.actionIds.selectIgnore,
-            initial_option: defaultLanguageOptions.find(
-              (option) => option.value === initialValues.defaultLanguage
-            ),
-            options: defaultLanguageOptions,
-          },
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Category Configuration',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'input',
+          multiline: true,
+        }),
+        Block.SectionWithSelect({
+          text: '*Image Shape*',
+          options: imageShapeOptions,
+          initialOptionValue: initialValues.imageShape,
+          blockId: this.blockIds.inputImageShape,
+          actionId: this.actionIds.selectIgnore,
+        }),
+        Block.SectionWithSelect({
+          text: '*Default language*',
+          options: defaultLanguageOptions,
+          initialOptionValue: initialValues.defaultLanguage,
+          blockId: this.blockIds.inputDefaultLanguage,
+          actionId: this.actionIds.selectIgnore,
+        }),
+        Block.Header('Category Configuration'),
+        Block.Divider(),
+        Block.TextInput({
+          label: 'Category select placeholder',
+          placeholder: 'ex) Select a category',
+          initialValue: initialValues.categorySelectPlaceholder,
+          blockId: this.blockIds.inputCategorySelectPlaceholder,
           optional: true,
-          block_id: this.blockIds.inputCategorySelectPlaceholder,
-          label: {
-            type: 'plain_text',
-            text: 'Category select placeholder',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.categorySelectPlaceholder,
-            placeholder: {
-              type: 'plain_text',
-              text: 'ex) Select a category',
-            },
-          },
-        },
-        {
-          type: 'input',
-          optional: false,
-          block_id: this.blockIds.inputMaxCategorySelections,
-          element: {
-            type: 'number_input',
-            min_value: '1',
-            is_decimal_allowed: false,
-            initial_value:
-              initialValues.maxCategorySelections?.toString() || '1',
-          },
-          label: {
-            type: 'plain_text',
-            text: 'Maximum number of selections',
-          },
-        },
-        { type: 'divider' },
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: '*Categories*',
-          },
-        },
+        }),
+        Block.NumberInput({
+          label: 'Maximum number of selections',
+          initialValue: initialValues.maxCategorySelections?.toString() || '1',
+          minValue: '1',
+          blockId: this.blockIds.inputMaxCategorySelections,
+        }),
+        Block.Divider(),
+        Block.Text('*Categories*'),
         ...this.buildCategoryBlocks(initialValues.categoryItems),
-        {
-          type: 'actions',
-          elements: [
-            {
-              type: 'button',
-              style: 'primary',
-              action_id: this.actionIds.addCategory,
-              text: {
-                type: 'plain_text',
-                text: 'Add Category',
-              },
-            },
-            {
-              type: 'button',
-              action_id: this.actionIds.fillCategoryColors,
-              confirm: {
-                title: {
-                  type: 'plain_text',
-                  text: 'This will reset all category colors.',
-                },
-                text: {
-                  type: 'plain_text',
-                  text: 'Are you sure?',
-                },
-                confirm: {
-                  type: 'plain_text',
-                  text: 'Yes',
-                },
-                deny: {
-                  type: 'plain_text',
-                  text: 'No',
-                },
-              },
-              text: {
-                type: 'plain_text',
-                text: 'Fill colors randomly',
-              },
-            },
-          ],
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Profile Card Configuration',
+        Block.Buttons([
+          {
+            text: 'Add Category',
+            style: 'primary',
+            actionId: this.actionIds.addCategory,
           },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'input',
+          {
+            text: 'Fill colors randomly',
+            confirm: {
+              title: 'This will reset all category colors.',
+              text: 'Are you sure?',
+              confirm: 'Yes',
+              deny: 'No',
+            },
+            actionId: this.actionIds.fillCategoryColors,
+          },
+        ]),
+        Block.Header('Profile Card Configuration'),
+        Block.Divider(),
+        Block.MultiSelect({
+          label: 'Social links',
+          placeholder: 'Select social links to show on profile card',
+          options: socialOptions,
+          initialOptionValues: socialInitialValues,
+          blockId: this.blockIds.inputSocialLinks,
           optional: true,
-          block_id: this.blockIds.inputSocialLinks,
-          label: {
-            type: 'plain_text',
-            text: 'Social links',
-          },
-          element: {
-            type: 'multi_static_select',
-            placeholder: {
-              type: 'plain_text',
-              text: 'Select social links to show on profile card',
-            },
-            initial_options: socialInitialOptions,
-            options: socialOptions,
-          },
-        },
-        {
-          type: 'input',
+        }),
+        Block.TextInput({
+          label: 'Subtitle placeholder',
+          placeholder: 'ex) CEO, Splab',
+          initialValue: initialValues.subtitlePlaceholder,
+          blockId: this.blockIds.inputSubtitlePlaceholder,
           optional: true,
-          block_id: this.blockIds.inputSubtitlePlaceholder,
-          label: {
-            type: 'plain_text',
-            text: 'Subtitle placeholder',
-          },
-          element: {
-            type: 'plain_text_input',
-            initial_value: initialValues.subtitlePlaceholder,
-            placeholder: {
-              type: 'plain_text',
-              text: 'ex) CEO, Splab',
-            },
-          },
-        },
-        {
-          type: 'header',
-          text: {
-            type: 'plain_text',
-            text: 'Permission Configuration',
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          type: 'section',
-          block_id: this.blockIds.inputSpacePermission,
-          text: {
-            type: 'mrkdwn',
-            text: '*Space*',
-          },
-          accessory: {
-            type: 'static_select',
-            action_id: this.actionIds.selectIgnore,
-            initial_option: spacePermissionOptions.find(
-              (option) => option.value === initialValues.spacePermission
-            ),
-            options: spacePermissionOptions,
-          },
-        },
-        {
-          type: 'section',
-          block_id: this.blockIds.inputMessagingPermission,
-          text: {
-            type: 'mrkdwn',
-            text: '*Messaging*',
-          },
-          accessory: {
-            type: 'static_select',
-
-            action_id: this.actionIds.selectIgnore,
-            initial_option: spaceMessagingPermissionOptions.find(
-              (option) => option.value === initialValues.messagingPermission
-            ),
-            options: spaceMessagingPermissionOptions,
-          },
-        },
-        {
-          type: 'section',
-          block_id: this.blockIds.inputBoardAccessType,
-          text: {
-            type: 'mrkdwn',
-            text: '*Community forum*',
-          },
-          accessory: {
-            type: 'static_select',
-            action_id: this.actionIds.selectIgnore,
-            initial_option: boardPermissionOptions.find(
-              (option) => option.value === initialValues.boardAccessType
-            ),
-            options: boardPermissionOptions,
-          },
-        },
+        }),
+        Block.Header('Permission Configuration'),
+        Block.Divider(),
+        Block.SectionWithSelect({
+          text: '*Space*',
+          options: spacePermissionOptions,
+          initialOptionValue: initialValues.spacePermission,
+          blockId: this.blockIds.inputSpacePermission,
+          actionId: this.actionIds.selectIgnore,
+        }),
+        Block.SectionWithSelect({
+          text: '*Messaging*',
+          options: spaceMessagingPermissionOptions,
+          initialOptionValue: initialValues.messagingPermission,
+          blockId: this.blockIds.inputMessagingPermission,
+          actionId: this.actionIds.selectIgnore,
+        }),
+        Block.SectionWithSelect({
+          text: '*Community forum*',
+          options: boardPermissionOptions,
+          initialOptionValue: initialValues.boardAccessType,
+          blockId: this.blockIds.inputBoardAccessType,
+          actionId: this.actionIds.selectIgnore,
+        }),
       ],
     };
   }
@@ -601,51 +357,22 @@ export class SpaceEditView implements ViewBuilder {
         categoryId: categoryItem.id,
       };
       blocks.push(
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: categoryItem.localizedNames
-              .map(({ text }) => text)
-              .join(' | '),
-          },
-          accessory: {
-            type: 'overflow',
-            action_id: this.actionIds.categoryActionsOverflow,
-            options: [
-              {
-                value: JSON.stringify(editActionValue),
-                text: {
-                  type: 'plain_text',
-                  text: ':large_blue_circle: Edit',
-                },
-              },
-              {
-                value: JSON.stringify(deleteActionValue),
-                text: {
-                  type: 'plain_text',
-                  text: ':red_circle: Delete',
-                },
-              },
-            ],
-          },
-        },
-        {
-          type: 'context',
-          elements: [
+        Block.SectionWithOverflow({
+          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
+          options: [
             {
-              type: 'mrkdwn',
-              text: categoryItem.id,
+              text: ':large_blue_circle: Edit',
+              value: JSON.stringify(editActionValue),
             },
             {
-              type: 'mrkdwn',
-              text: categoryItem.color || ' ',
+              text: ':red_circle: Delete',
+              value: JSON.stringify(deleteActionValue),
             },
           ],
-        },
-        {
-          type: 'divider',
-        }
+          actionId: this.actionIds.categoryActionsOverflow,
+        }),
+        Block.Context([categoryItem.id, categoryItem.color || ' ']),
+        Block.Divider()
       );
     });
 
