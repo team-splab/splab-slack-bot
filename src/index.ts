@@ -15,6 +15,7 @@ import { SpaceCategoryEditView } from './services/umoh/edit/space-category-edit.
 import { redisClient } from './redis';
 import { SpaceNotiReactionService } from './services/umoh/noti/space-noti-reaction.service';
 import { SpaceNotiScrapService } from './services/umoh/noti/space-noti-scrap.service';
+import { CardCreateService } from './services/umoh/card-create/card-create.service';
 
 dotenv.config();
 
@@ -37,6 +38,8 @@ const spaceCategoryCreateService = new SpaceCategoryEditService(
 );
 const spaceNotiReactionService = new SpaceNotiReactionService();
 const spaceNotiScrapService = new SpaceNotiScrapService();
+const spaceCardCreateService = new CardCreateService();
+
 const slashCommandServices: SlashCommandService[] = [
   new HostManagementService(),
   new SpaceEditService(
@@ -46,6 +49,7 @@ const slashCommandServices: SlashCommandService[] = [
   ),
   spaceNotiReactionService,
   spaceNotiScrapService,
+  spaceCardCreateService,
 ];
 
 app.event('app_mention', async ({ event, say }) => {
