@@ -13,14 +13,14 @@ export const SpaceEngagingApi = {
       `/v2/admin/space/${spaceHandle}/popular/scrap`
     );
   },
-  sendEngagingByReaction: (spaceHandle: string) => {
+  sendEngagingByReaction: (spaceHandle: string, dday: String) => {
     return sendtimeApi.post<SendtimeApiResponse<Boolean>>(
-      `/v2/admin/space/${spaceHandle}/popular/reaction`
+      `/v2/admin/space/${spaceHandle}/popular/reaction/${dday}`
     );
   },
-  sendEngagingByScrap: (spaceHandle: string) => {
+  sendEngagingByScrap: (spaceHandle: string, dday: String) => {
     return sendtimeApi.post<SendtimeApiResponse<Boolean>>(
-      `/v2/admin/space/${spaceHandle}/popular/scrap`
+      `/v2/admin/space/${spaceHandle}/popular/scrap/${dday}`
     );
   },
 };

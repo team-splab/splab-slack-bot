@@ -1,4 +1,9 @@
-import { AllMiddlewareArgs, SlackViewMiddlewareArgs, View } from '@slack/bolt';
+import {
+  AllMiddlewareArgs,
+  SlackViewMiddlewareArgs,
+  View,
+  ViewOutput,
+} from '@slack/bolt';
 import {
   SlashCommandArgs,
   SlashCommandService,
@@ -13,6 +18,7 @@ import {
   savePrivateMetadata,
 } from '../../../utils/redis';
 import { SpaceEngagingApi } from '../../../apis/space/engaging';
+import { getValuesFromState } from '../../../utils/slack';
 
 interface PrivateMetadata {
   spaceHandle: string;
@@ -134,6 +140,114 @@ export class SpaceNotiScrapService implements SlashCommandService {
                 },
               ],
             },
+            {
+              type: 'input',
+              block_id: 'dday-select',
+              element: {
+                type: 'static_select',
+                placeholder: {
+                  type: 'plain_text',
+                  text: 'Select an item',
+                  emoji: true,
+                },
+                options: [
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '0',
+                      emoji: true,
+                    },
+                    value: 'day',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '1',
+                      emoji: true,
+                    },
+                    value: '1',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '2',
+                      emoji: true,
+                    },
+                    value: '2',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '3',
+                      emoji: true,
+                    },
+                    value: '3',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '4',
+                      emoji: true,
+                    },
+                    value: '4',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '5',
+                      emoji: true,
+                    },
+                    value: '5',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '6',
+                      emoji: true,
+                    },
+                    value: '6',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '7',
+                      emoji: true,
+                    },
+                    value: '7',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '8',
+                      emoji: true,
+                    },
+                    value: '8',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '9',
+                      emoji: true,
+                    },
+                    value: '9',
+                  },
+                  {
+                    text: {
+                      type: 'plain_text',
+                      text: '10',
+                      emoji: true,
+                    },
+                    value: '10',
+                  },
+                ],
+                action_id: 'dday-select-action',
+              },
+              label: {
+                type: 'plain_text',
+                text: 'Day minus',
+                emoji: true,
+              },
+            },
           ],
         },
       });
@@ -177,8 +291,10 @@ export class SpaceNotiScrapService implements SlashCommandService {
       `${new Date()} - space handle: ${spaceHandle}, channel: ${channel}, userId: ${userId}`
     );
 
+    const day = this.getDayFromState(view.state);
+
     try {
-      await SpaceEngagingApi.sendEngagingByScrap(spaceHandle);
+      await SpaceEngagingApi.sendEngagingByScrap(spaceHandle, day);
       logger.info(`${new Date()} - engaging(Scrap) Email, SMS sent`);
     } catch (error) {
       logger.error(`${new Date()} - error: ${error}`);
@@ -202,5 +318,17 @@ export class SpaceNotiScrapService implements SlashCommandService {
     });
 
     await deletePrivateMetadata({ viewId: view.id });
+  }
+
+  private getDayFromState(state: ViewOutput['state']): string {
+    let values = getValuesFromState({
+      state: state,
+      blockIds: { ddaySelect: 'dday-select' },
+    });
+    values = {
+      ddaySelect: values.ddaySelect?.trim(),
+    };
+
+    return values.ddaySelect ?? '1';
   }
 }
