@@ -56,7 +56,7 @@ export const postBlocksInThread = async ({
   const messageResponse = await client.chat.postMessage({
     channel: channel,
     mrkdwn: true,
-    messageText,
+    text: messageText,
     blocks: messageBlocks,
   });
   const blockSplits = threadBlocks.reduce(
