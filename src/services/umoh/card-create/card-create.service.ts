@@ -1,3 +1,4 @@
+import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { SpaceApi } from '../../../apis/space';
 import { Space } from '../../../apis/space/types';
 import { app } from '../../../app';
@@ -6,7 +7,19 @@ import {
   SlashCommandService,
 } from '../../../interfaces/slash-command-service';
 import { SLASH_COMMANDS } from '../../../utils/consts';
-import { CardCreateView } from './card-create.view';
+import {
+  CardCreateView,
+  CardCreateViewPrivateMetadata,
+} from './card-create.view';
+import { CardSpreadsheetProvider } from './card-spreadsheet-provider';
+import {
+  AllMiddlewareArgs,
+  BlockButtonAction,
+  SlackActionMiddlewareArgs,
+} from '@slack/bolt';
+import { getValuesFromState } from '../../../utils/slack';
+import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
+import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create.ts/types';
 
 export class CardCreateService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -15,9 +28,10 @@ export class CardCreateService implements SlashCommandService {
   private readonly cardCreateView = new CardCreateView();
 
   constructor() {
-    app.action(this.cardCreateView.actionIds.loadSpreadsheet, async () => {
-      console.log('test');
-    });
+    app.action(
+      this.cardCreateView.actionIds.loadSpreadsheet,
+      this.onLoadSpreadsheetAction.bind(this)
+    );
   }
 
   async onSlashCommand({
@@ -65,18 +79,58 @@ export class CardCreateService implements SlashCommandService {
       view: this.cardCreateView.build(),
     });
 
-    // const viewId = viewRes.view?.id;
-    // if (!viewId) {
-    //   logger.error(`${new Date()} - viewId is not provided`);
-    //   return;
-    // }
+    const viewId = viewRes.view?.id;
+    if (!viewId) {
+      logger.error(`${new Date()} - viewId is not provided`);
+      return;
+    }
 
-    // const privateMetadata: SpaceEditViewPrivateMetadata = {
-    //   spaceHandle,
-    //   channel: command.channel_id,
-    //   userId: command.user_id,
-    //   categoryItems: space.profileCategoryConfig?.categoryItems || [],
-    // };
-    // await savePrivateMetadata({ viewId, privateMetadata });
+    const privateMetadata: CardCreateViewPrivateMetadata = {
+      spaceId: space.id,
+      channel: command.channel_id,
+      userId: command.user_id,
+    };
+    await savePrivateMetadata({ viewId, privateMetadata });
+  }
+
+  private async onLoadSpreadsheetAction({
+    logger,
+    client,
+    body,
+    ack,
+  }: SlackActionMiddlewareArgs<BlockButtonAction> & AllMiddlewareArgs) {
+    logger.info(`${new Date()} - onLoadSpreadsheetAction`);
+
+    const view = body.view;
+    if (!view) {
+      logger.error(`${new Date()} - view is not provided`);
+      await ack();
+      return;
+    }
+
+    const { spaceId }: CardCreateViewPrivateMetadata = await getPrivateMetadata(
+      { viewId: view.id }
+    );
+
+    const { inputSpreadsheetUrl } = getValuesFromState({
+      state: view.state,
+      blockIds: this.cardCreateView.blockIds,
+    });
+
+    let cards: SignUpAndCreateSpaceProfileRequest[];
+    try {
+      const provider = new CardSpreadsheetProvider(
+        inputSpreadsheetUrl || '',
+        spaceId
+      );
+      await provider.initialize();
+      cards = await provider.getCardData();
+    } catch (error) {
+      logger.error(`${new Date()} - error: ${error}`);
+      await ack();
+      return;
+    }
+
+    await ack();
   }
 }

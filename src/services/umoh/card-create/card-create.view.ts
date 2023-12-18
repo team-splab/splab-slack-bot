@@ -3,6 +3,12 @@ import { ViewBuilder } from '../../../interfaces/view-builder';
 import { Element } from '../../../components/elements';
 import { Block } from '../../../components/blocks';
 
+export interface CardCreateViewPrivateMetadata {
+  spaceId: string;
+  channel: string;
+  userId: string;
+}
+
 export class CardCreateView implements ViewBuilder {
   readonly callbackId = 'card-create';
 
