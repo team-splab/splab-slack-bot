@@ -6,7 +6,7 @@ import {
   SpaceSupportedSocial,
 } from '../apis/space/types';
 import { shuffle } from './array';
-import { SpaceProfileLink } from '../apis/space/profile-create.ts/types';
+import { SpaceProfileLink } from '../apis/space/profile-create/types';
 
 export const getSpaceUrl = (spaceHandle: string) => {
   return process.env.IS_PRODUCTION === 'true'

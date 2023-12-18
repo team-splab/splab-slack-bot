@@ -2,7 +2,7 @@ import { KnownBlock, View } from '@slack/bolt';
 import { ViewBuilder } from '../../../interfaces/view-builder';
 import { Element } from '../../../components/elements';
 import { Block } from '../../../components/blocks';
-import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create.ts/types';
+import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create/types';
 import { SpaceSocialUtil } from '../../../utils/space';
 
 export interface CardCreateViewPrivateMetadata {

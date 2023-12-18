@@ -3,7 +3,7 @@ import { googleJwt } from '../../../google-auth';
 import {
   SignUpAndCreateSpaceProfileRequest,
   SpaceProfileLink,
-} from '../../../apis/space/profile-create.ts/types';
+} from '../../../apis/space/profile-create/types';
 import { parsePhoneNumber } from 'libphonenumber-js';
 import { SpaceSupportedSocial } from '../../../apis/space/types';
 import { SpaceSocialUtil } from '../../../utils/space';

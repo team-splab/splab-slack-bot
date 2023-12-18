@@ -19,7 +19,7 @@ import {
 } from '@slack/bolt';
 import { getValuesFromState } from '../../../utils/slack';
 import { getPrivateMetadata, savePrivateMetadata } from '../../../utils/redis';
-import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create.ts/types';
+import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create/types';
 
 export class CardCreateService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
