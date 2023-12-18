@@ -7,6 +7,7 @@ import { SpaceSocialUtil } from '../../../utils/space';
 
 export interface CardCreateViewPrivateMetadata {
   spaceId: string;
+  spaceHandle: string;
   channel: string;
   userId: string;
   createCardRequestDtos: SignUpAndCreateSpaceProfileRequest[];
@@ -88,7 +89,7 @@ export class CardCreateView implements ViewBuilder {
       callback_id: this.callbackId,
       notify_on_close: true,
       title: Element.PlainText('Create Card'),
-      submit: Element.PlainText('Create'),
+      submit: Element.PlainText('Start'),
       close: Element.PlainText('Cancel'),
       blocks,
     };
