@@ -8,8 +8,11 @@ export const Element = {
       ? ({ type: 'plain_text', text } as PlainTextElement)
       : (undefined as any);
   },
-  MarkdownText: (text: string): MrkdwnElement => ({
-    type: 'mrkdwn',
-    text,
-  }),
+  MarkdownText: <T extends string | undefined>(
+    text: T
+  ): T extends string ? MrkdwnElement : MrkdwnElement | undefined => {
+    return text
+      ? ({ type: 'mrkdwn', text } as MrkdwnElement)
+      : (undefined as any);
+  },
 };

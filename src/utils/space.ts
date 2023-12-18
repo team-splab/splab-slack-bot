@@ -150,4 +150,9 @@ export const SpaceSocialUtil = {
       iconId: SpaceSocialUtil.getSocialIconId(social),
     };
   },
+  getSocialFromIconId: (iconId: string): SpaceSupportedSocial | undefined => {
+    return Object.entries(socialToIconIdMap).find(
+      ([, value]) => value === iconId
+    )?.[0] as SpaceSupportedSocial;
+  },
 };

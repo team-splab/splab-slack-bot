@@ -76,7 +76,7 @@ export class CardCreateService implements SlashCommandService {
 
     const viewRes = await client.views.open({
       trigger_id: command.trigger_id,
-      view: this.cardCreateView.build(),
+      view: this.cardCreateView.build({}),
     });
 
     const viewId = viewRes.view?.id;
@@ -89,6 +89,7 @@ export class CardCreateService implements SlashCommandService {
       spaceId: space.id,
       channel: command.channel_id,
       userId: command.user_id,
+      createCardRequestDtos: [],
     };
     await savePrivateMetadata({ viewId, privateMetadata });
   }
@@ -108,29 +109,54 @@ export class CardCreateService implements SlashCommandService {
       return;
     }
 
-    const { spaceId }: CardCreateViewPrivateMetadata = await getPrivateMetadata(
-      { viewId: view.id }
-    );
+    let metadata: CardCreateViewPrivateMetadata = await getPrivateMetadata({
+      viewId: view.id,
+    });
 
     const { inputSpreadsheetUrl } = getValuesFromState({
       state: view.state,
       blockIds: this.cardCreateView.blockIds,
     });
 
-    let cards: SignUpAndCreateSpaceProfileRequest[];
+    let cards: SignUpAndCreateSpaceProfileRequest[] = [];
     try {
       const provider = new CardSpreadsheetProvider(
         inputSpreadsheetUrl || '',
-        spaceId
+        metadata.spaceId
       );
       await provider.initialize();
       cards = await provider.getCardData();
-    } catch (error) {
+    } catch (error: any) {
       logger.error(`${new Date()} - error: ${error}`);
       await ack();
+
+      await client.views.update({
+        view_id: view.id,
+        view: this.cardCreateView.build({
+          error: error.toString(),
+          spreadsheetUrl: inputSpreadsheetUrl,
+        }),
+      });
       return;
+    } finally {
+      metadata = {
+        ...metadata,
+        createCardRequestDtos: cards,
+      };
+      await savePrivateMetadata({
+        viewId: view.id,
+        privateMetadata: metadata,
+      });
     }
 
     await ack();
+
+    await client.views.update({
+      view_id: view.id,
+      view: this.cardCreateView.build({
+        spreadsheetUrl: inputSpreadsheetUrl,
+        cards,
+      }),
+    });
   }
 }
