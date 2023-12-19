@@ -48,6 +48,7 @@ import {
   SpaceImageShapes,
   getSpaceImageShapeValue,
 } from '../../../utils/space-image-shape';
+import { Block } from '../../../components/blocks';
 
 export class SpaceEditService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
@@ -356,34 +357,18 @@ export class SpaceEditService implements SlashCommandService {
     });
 
     const blocks = [
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: 'Basic Information',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text:
-            `*Handle*\n@${spaceUpdated.handle}\n` +
-            `*Title*\n${spaceUpdated.title}\n` +
-            `*Description*\n${spaceUpdated.description || ''}\n` +
-            `${spaceUpdated.contactPoints
-              .map(
-                ({ type, value }) =>
-                  `*${capitalizeFirstLetter(type)}*\n${value}`
-              )
-              .join('\n')}\n` +
-            `*Image shape*\n${getSpaceImageShapeValue(spaceUpdated).label}\n` +
-            `*Default language*\n${spaceUpdated.defaultLanguage}`,
-        },
-      },
+      Block.Header('Basic Information'),
+      Block.Divider(),
+      Block.Text(`*Handle*\n@${spaceUpdated.handle}`),
+      Block.Text(`*Title*\n${spaceUpdated.title}`),
+      Block.Text(`*Description*\n${spaceUpdated.description || ''}`),
+      ...spaceUpdated.contactPoints.map(({ type, value }) =>
+        Block.Text(`*${capitalizeFirstLetter(type)}*\n${value}`)
+      ),
+      Block.Text(
+        `*Image shape*\n${getSpaceImageShapeValue(spaceUpdated).label}`
+      ),
+      Block.Text(`*Default language*\n${spaceUpdated.defaultLanguage}`),
       {
         type: 'header',
         text: {
@@ -394,104 +379,62 @@ export class SpaceEditService implements SlashCommandService {
       {
         type: 'divider',
       },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text:
-            `*Category select placeholder*\n${
-              spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
-                ({ language }) => language === spaceUpdated.defaultLanguage
-              )?.text || ''
-            }\n` +
-            `*Maximum number of selections*\n${
-              spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
-            }`,
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: '*Category items*',
-        },
-      },
+      Block.Text(
+        `*Category select placeholder*\n${
+          spaceUpdated.profileCategoryConfig?.localizedCategoryLabels.find(
+            ({ language }) => language === spaceUpdated.defaultLanguage
+          )?.text || ''
+        }`
+      ),
+      Block.Text(
+        `*Maximum number of selections*\n${
+          spaceUpdated.profileCategoryConfig?.maxItemNumber || 1
+        }`
+      ),
+      Block.Divider(),
+      Block.Text('*Category items*'),
       ...this.buildCategoryBlocks(categoryItems),
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: 'Profile Card Configuration',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*Supported socials*\n${
-            spaceUpdated.profileCreateConfig?.supportedSocials
-              ?.map((social) => SpaceSupportedSocials[social].label)
-              .join(', ') || ''
-          }`,
-        },
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*Subtitle placeholder*\n${
-            spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
-              ({ language }) => language === spaceUpdated.defaultLanguage
-            )?.text || ''
-          }`,
-        },
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `*Lucky draw*\n${
-            spaceUpdated.profileBackfaceConfig?.isBackfaceEnabled
-              ? 'Enabled'
-              : 'Disabled'
-          }`,
-        },
-      },
-      {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: 'Permission Configuration',
-        },
-      },
-      {
-        type: 'divider',
-      },
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text:
-            `*Space*\n${getSpacePermissionValue(spaceUpdated).label}\n` +
-            `*Messaging*\n${
-              spaceMessagingPermissionOptions.find(
-                ({ value }) => value === spaceUpdated.messagingOption
-              )?.text.text
-            }\n` +
-            `*Community forum*\n${
-              spaceUpdated.boardConfig?.isEnabled
-                ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
-                : 'Disabled'
-            }\n` +
-            `*Entry code*\n${spaceUpdated.enterCode || ''}`,
-        },
-      },
+      Block.Header('Profile Card Configuration'),
+      Block.Divider(),
+      Block.Text(
+        `*Supported socials*\n${
+          spaceUpdated.profileCreateConfig?.supportedSocials
+            ?.map((social) => SpaceSupportedSocials[social].label)
+            .join(', ') || ''
+        }`
+      ),
+      Block.Text(
+        `*Subtitle placeholder*\n${
+          spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
+            ({ language }) => language === spaceUpdated.defaultLanguage
+          )?.text || ''
+        }`
+      ),
+      Block.Text(
+        `*Lucky draw*\n${
+          spaceUpdated.profileBackfaceConfig?.isBackfaceEnabled
+            ? 'Enabled'
+            : 'Disabled'
+        }`
+      ),
+      Block.Header('Permission Configuration'),
+      Block.Divider(),
+      Block.Text(`*Space*\n${getSpacePermissionValue(spaceUpdated).label}`),
+      Block.Text(
+        `*Messaging*\n${
+          spaceMessagingPermissionOptions.find(
+            ({ value }) => value === spaceUpdated.messagingOption
+          )?.text.text
+        }`
+      ),
+      Block.Text(
+        `*Community forum*\n${
+          spaceUpdated.boardConfig?.isEnabled
+            ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
+            : 'Disabled'
+        }`
+      ),
+      Block.Text(`*Entry code*\n${spaceUpdated.enterCode || ''}`),
     ];
 
     const userProfileResponse = await client.users.profile.get({
@@ -509,15 +452,11 @@ export class SpaceEditService implements SlashCommandService {
       channel: channel,
       messageText: `@${spaceUpdated.handle} has been edited by ${userDisplayName}`,
       messageBlocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: `*<${getSpaceUrl(spaceUpdated.handle)}|@${
-              spaceUpdated.handle
-            }>* has been edited by *${userDisplayName}*`,
-          },
-        },
+        Block.Text(
+          `*<${getSpaceUrl(spaceUpdated.handle)}|@${
+            spaceUpdated.handle
+          }>* has been edited by *${userDisplayName}*`
+        ),
       ],
       threadBlocks: blocks,
     });
@@ -531,29 +470,13 @@ export class SpaceEditService implements SlashCommandService {
     const blocks: KnownBlock[] = [];
 
     categoryItems.forEach((categoryItem) => {
-      blocks.push({
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
-        },
-      });
-      blocks.push({
-        type: 'context',
-        elements: [
-          {
-            type: 'mrkdwn',
-            text: categoryItem.id,
-          },
-          {
-            type: 'mrkdwn',
-            text: categoryItem.color || ' ',
-          },
-        ],
-      });
-      blocks.push({
-        type: 'divider',
-      });
+      blocks.push(
+        Block.Text(
+          categoryItem.localizedNames.map(({ text }) => text).join(' | ')
+        )
+      );
+      blocks.push(Block.Context([categoryItem.id, categoryItem.color || ' ']));
+      blocks.push(Block.Divider());
     });
 
     return blocks;
