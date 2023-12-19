@@ -235,63 +235,51 @@ export class SpaceEditService implements SlashCommandService {
       return;
     }
 
-    const {
-      inputHandle,
-      inputTitle,
-      inputDescription,
-      inputContacts,
-      inputImageShape,
-      inputDefaultLanguage,
-      inputCategorySelectPlaceholder,
-      inputMaxCategorySelections,
-      inputSocialLinks,
-      inputSubtitlePlaceholder,
-      inputSpacePermission,
-      inputMessagingPermission,
-      inputBoardAccessType,
-      inputEntryCode,
-    } = getValuesFromState({
+    const stateValues = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
     });
 
     const contactPoints: SpaceContactPoint[] =
-      inputContacts?.split(/[\n,]+/).map((value) => getContactPoint(value)) ||
-      [];
+      stateValues.inputContacts
+        ?.split(/[\n,]+/)
+        .map((value) => getContactPoint(value)) || [];
 
-    const imageShape = SpaceImageShapes[inputImageShape as SpaceImageShapeType];
+    const imageShape =
+      SpaceImageShapes[stateValues.inputImageShape as SpaceImageShapeType];
 
-    const defaultLanguage = inputDefaultLanguage || space.defaultLanguage;
+    const defaultLanguage =
+      stateValues.inputDefaultLanguage || space.defaultLanguage;
     const localizedCategoryLabels = updateLocalizedTexts(
       space.profileCategoryConfig?.localizedCategoryLabels || [],
       {
         language: defaultLanguage,
-        text: inputCategorySelectPlaceholder || '',
+        text: stateValues.inputCategorySelectPlaceholder || '',
       }
     );
     const localizedSubtitlePlaceholders = updateLocalizedTexts(
       space.profileCreateConfig?.localizedSubtitlePlaceholders || [],
       {
         language: defaultLanguage,
-        text: inputSubtitlePlaceholder || '',
+        text: stateValues.inputSubtitlePlaceholder || '',
       }
     );
 
     const spacePermission =
-      SpacePermissions[inputSpacePermission as SpacePermissionType];
+      SpacePermissions[stateValues.inputSpacePermission as SpacePermissionType];
 
     const spaceUpdateParams: SpaceUpdateParams = {
       ...space,
-      handle: inputHandle || space.handle,
-      title: inputTitle || space.title,
-      description: inputDescription,
+      handle: stateValues.inputHandle || space.handle,
+      title: stateValues.inputTitle || space.title,
+      description: stateValues.inputDescription,
       contactPoints,
       ...imageShape.criteria,
       defaultLanguage,
       profileCreateConfig: {
         ...space.profileCreateConfig,
         defaultLanguage,
-        supportedSocials: (inputSocialLinks
+        supportedSocials: (stateValues.inputSocialLinks
           ?.split(',')
           .filter((value) => value) || []) as SpaceSupportedSocial[],
         localizedSubtitlePlaceholders:
@@ -306,23 +294,24 @@ export class SpaceEditService implements SlashCommandService {
               defaultLanguage,
               categoryItems,
               localizedCategoryLabels,
-              maxItemNumber: inputMaxCategorySelections
-                ? parseInt(inputMaxCategorySelections)
+              maxItemNumber: stateValues.inputMaxCategorySelections
+                ? parseInt(stateValues.inputMaxCategorySelections)
                 : space.profileCategoryConfig?.maxItemNumber || 1,
             },
       profileSubtitleType:
         localizedSubtitlePlaceholders.length === 0 ? 'CATEGORY' : 'SUBTITLE',
       boardConfig: {
-        isEnabled: inputBoardAccessType !== 'DISABLED',
+        isEnabled: stateValues.inputBoardAccessType !== 'DISABLED',
         accessType:
-          inputBoardAccessType !== 'DISABLED'
-            ? (inputBoardAccessType as SpaceBoardAccessType)
+          stateValues.inputBoardAccessType !== 'DISABLED'
+            ? (stateValues.inputBoardAccessType as SpaceBoardAccessType)
             : 'PRIVATE',
       },
       ...spacePermission.criteria,
-      enterCode: inputEntryCode,
-      isNeedMessaging: inputMessagingPermission !== 'DISABLED',
-      messagingOption: inputMessagingPermission as SpaceMessagingOption,
+      enterCode: stateValues.inputEntryCode,
+      isNeedMessaging: stateValues.inputMessagingPermission !== 'DISABLED',
+      messagingOption:
+        stateValues.inputMessagingPermission as SpaceMessagingOption,
       id: undefined,
       hostId: undefined,
       hosts: undefined,
