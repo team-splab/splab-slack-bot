@@ -20,6 +20,7 @@ export interface SpaceCategoryOverflowActionValue {
 }
 
 export interface SpaceEditViewPrivateMetadata {
+  spaceId: string;
   spaceHandle: string;
   channel: string;
   userId: string;
@@ -77,9 +78,11 @@ export class SpaceEditView implements ViewBuilder {
 
   buildWithState({
     state,
+    spaceId,
     categoryItems,
   }: {
     state: ViewOutput['state'];
+    spaceId: string;
     categoryItems?: SpaceProfileCategoryItem[];
   }): View {
     const values = getValuesFromState({
@@ -88,6 +91,7 @@ export class SpaceEditView implements ViewBuilder {
     });
     return this.build({
       initialValues: {
+        spaceId,
         handle: values.inputHandle || '',
         title: values.inputTitle || '',
         description: values.inputDescription,
@@ -111,6 +115,7 @@ export class SpaceEditView implements ViewBuilder {
     initialValues,
   }: {
     initialValues: {
+      spaceId: string;
       handle: string;
       title: string;
       description?: string;
@@ -210,11 +215,12 @@ export class SpaceEditView implements ViewBuilder {
       submit: Element.PlainText('Edit'),
       close: Element.PlainText('Cancel'),
       blocks: [
-        Block.Text(
-          `Space: <${getSpaceUrl(initialValues.handle)}|${getSpaceUrl(
+        Block.Context([
+          `URL: <${getSpaceUrl(initialValues.handle)}|${getSpaceUrl(
             initialValues.handle
-          )}>`
-        ),
+          )}>`,
+          `ID: ${initialValues.spaceId}`,
+        ]),
         Block.Header('Basic Information'),
         Block.Divider(),
         Block.TextInput({

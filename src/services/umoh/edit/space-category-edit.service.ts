@@ -228,6 +228,7 @@ export class SpaceCategoryEditService {
       view_id: spaceEditViewId,
       view: this.spaceEditView.buildWithState({
         state: spaceEditViewState,
+        spaceId: spaceEditViewPrivateMetadata.spaceId,
         categoryItems,
       }),
     });
@@ -286,6 +287,7 @@ export class SpaceCategoryEditService {
       view_id: spaceEditView.id,
       view: this.spaceEditView.buildWithState({
         state: spaceEditView.state,
+        spaceId: spaceEditViewPrivateMetadata.spaceId,
         categoryItems,
       }),
     });
@@ -372,6 +374,7 @@ export class SpaceCategoryEditService {
       view_id: spaceEditView.id,
       view: this.spaceEditView.buildWithState({
         state: spaceEditView.state,
+        spaceId: spaceEditViewPrivateMetadata.spaceId,
         categoryItems,
       }),
     });

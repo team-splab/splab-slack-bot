@@ -147,6 +147,7 @@ export class SpaceEditService implements SlashCommandService {
       trigger_id: command.trigger_id,
       view: this.spaceEditView.build({
         initialValues: {
+          spaceId: space.id,
           handle: space.handle,
           title: space.title,
           description: space.description,
@@ -183,6 +184,7 @@ export class SpaceEditService implements SlashCommandService {
     }
 
     const privateMetadata: SpaceEditViewPrivateMetadata = {
+      spaceId: space.id,
       spaceHandle,
       channel: command.channel_id,
       userId: command.user_id,
