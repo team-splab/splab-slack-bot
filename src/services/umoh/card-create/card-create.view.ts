@@ -3,7 +3,7 @@ import { ViewBuilder } from '../../../interfaces/view-builder';
 import { Element } from '../../../components/elements';
 import { Block } from '../../../components/blocks';
 import { SignUpAndCreateSpaceProfileRequest } from '../../../apis/space/profile-create/types';
-import { SpaceSocialUtil } from '../../../utils/space';
+import { SpaceSocialUtil, getSpaceUrl } from '../../../utils/space';
 
 export interface CardCreateViewPrivateMetadata {
   spaceId: string;
@@ -25,15 +25,20 @@ export class CardCreateView implements ViewBuilder {
   };
 
   build({
+    spaceHandle,
     error,
     spreadsheetUrl,
     cards = [],
   }: {
+    spaceHandle: string;
     error?: string;
     spreadsheetUrl?: string;
     cards?: SignUpAndCreateSpaceProfileRequest[];
   }): View {
     let blocks: KnownBlock[] = [
+      Block.Context([
+        `Space: <${getSpaceUrl(spaceHandle)}|${getSpaceUrl(spaceHandle)}>`,
+      ]),
       Block.TextInput({
         label: 'Google spreadsheet URL',
         placeholder: 'https://docs.google.com/spreadsheets/d/...',
@@ -65,7 +70,7 @@ export class CardCreateView implements ViewBuilder {
             fields: [
               `*Name*\n${card.signUpInfo.name}`,
               `*Email*\n${card.signUpInfo.email}`,
-              `*Phone*\n${card.signUpInfo.phone}`,
+              `*Phone*\n${card.signUpInfo.phone || ''}`,
               `*Category IDs*\n${card.spaceProfileInfo.categoryIds.join(', ')}`,
               `*Subtitle*\n${card.spaceProfileInfo.subtitle}`,
               `*Description*\n${card.spaceProfileInfo.description}`,

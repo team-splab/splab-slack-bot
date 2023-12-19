@@ -97,7 +97,9 @@ export class CardCreateService implements SlashCommandService {
 
     const viewRes = await client.views.open({
       trigger_id: command.trigger_id,
-      view: this.cardCreateView.build({}),
+      view: this.cardCreateView.build({
+        spaceHandle,
+      }),
     });
 
     const viewId = viewRes.view?.id;
@@ -155,6 +157,7 @@ export class CardCreateService implements SlashCommandService {
       await client.views.update({
         view_id: view.id,
         view: this.cardCreateView.build({
+          spaceHandle: metadata.spaceHandle,
           error: error.toString(),
           spreadsheetUrl: inputSpreadsheetUrl,
         }),
@@ -176,6 +179,7 @@ export class CardCreateService implements SlashCommandService {
     await client.views.update({
       view_id: view.id,
       view: this.cardCreateView.build({
+        spaceHandle: metadata.spaceHandle,
         spreadsheetUrl: inputSpreadsheetUrl,
         cards,
       }),
