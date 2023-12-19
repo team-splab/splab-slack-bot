@@ -68,6 +68,7 @@ export class SpaceEditView implements ViewBuilder {
     inputSpacePermission: 'input-space-permission',
     inputMessagingPermission: 'input-messaging-permission',
     inputBoardAccessType: 'input-board-access-type',
+    inputEntryCode: 'input-entry-code',
   };
   readonly actionIds = {
     categoryActionsOverflow: 'category-actions-overflow',
@@ -107,6 +108,7 @@ export class SpaceEditView implements ViewBuilder {
         subtitlePlaceholder: values.inputSubtitlePlaceholder,
         messagingPermission: values.inputMessagingPermission,
         boardAccessType: values.inputBoardAccessType,
+        entryCode: values.inputEntryCode,
       },
     });
   }
@@ -130,6 +132,7 @@ export class SpaceEditView implements ViewBuilder {
       spacePermission?: string;
       messagingPermission?: string;
       boardAccessType?: string;
+      entryCode?: string;
     };
   }): View {
     const defaultLanguageOptions: PlainTextOption[] = [
@@ -343,6 +346,13 @@ export class SpaceEditView implements ViewBuilder {
           initialOptionValue: initialValues.boardAccessType,
           blockId: this.blockIds.inputBoardAccessType,
           actionId: this.actionIds.selectIgnore,
+        }),
+        Block.TextInput({
+          label: 'Entry code',
+          placeholder: 'ex) 231219, splab',
+          initialValue: initialValues.entryCode,
+          blockId: this.blockIds.inputEntryCode,
+          optional: true,
         }),
       ],
     };

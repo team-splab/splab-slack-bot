@@ -39,6 +39,7 @@ export interface Space {
   isAccessLimitedToOnlyCardOwners: boolean;
   isFullyPrivate: boolean;
   defaultProfileVisible: boolean;
+  enterCode?: string;
   isNeedMessaging: boolean;
   messagingOption: SpaceMessagingOption;
 }

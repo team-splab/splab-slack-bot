@@ -173,6 +173,7 @@ export class SpaceEditService implements SlashCommandService {
           boardAccessType: space.boardConfig?.isEnabled
             ? space.boardConfig?.accessType
             : 'DISABLED',
+          entryCode: space.enterCode,
         },
       }),
     });
@@ -248,6 +249,7 @@ export class SpaceEditService implements SlashCommandService {
       inputSpacePermission,
       inputMessagingPermission,
       inputBoardAccessType,
+      inputEntryCode,
     } = getValuesFromState({
       state: view.state,
       blockIds: this.spaceEditView.blockIds,
@@ -318,6 +320,7 @@ export class SpaceEditService implements SlashCommandService {
             : 'PRIVATE',
       },
       ...spacePermission.criteria,
+      enterCode: inputEntryCode,
       isNeedMessaging: inputMessagingPermission !== 'DISABLED',
       messagingOption: inputMessagingPermission as SpaceMessagingOption,
       id: undefined,
@@ -478,7 +481,8 @@ export class SpaceEditService implements SlashCommandService {
               spaceUpdated.boardConfig?.isEnabled
                 ? capitalizeFirstLetter(spaceUpdated.boardConfig?.accessType)
                 : 'Disabled'
-            }`,
+            }\n` +
+            `*Entry code*\n${spaceUpdated.enterCode || ''}`,
         },
       },
     ];
