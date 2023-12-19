@@ -65,6 +65,7 @@ export class SpaceEditView implements ViewBuilder {
     inputMaxCategorySelections: 'input-max-category-selections',
     inputSocialLinks: 'input-social-links',
     inputSubtitlePlaceholder: 'input-subtitle-placeholder',
+    inputLuckyDraw: 'input-lucky-draw',
     inputSpacePermission: 'input-space-permission',
     inputMessagingPermission: 'input-messaging-permission',
     inputBoardAccessType: 'input-board-access-type',
@@ -106,6 +107,7 @@ export class SpaceEditView implements ViewBuilder {
         categoryItems: categoryItems || [],
         socialLinks: values.inputSocialLinks?.split(','),
         subtitlePlaceholder: values.inputSubtitlePlaceholder,
+        luckyDraw: values.inputLuckyDraw,
         messagingPermission: values.inputMessagingPermission,
         boardAccessType: values.inputBoardAccessType,
         entryCode: values.inputEntryCode,
@@ -129,6 +131,7 @@ export class SpaceEditView implements ViewBuilder {
       categoryItems: SpaceProfileCategoryItem[];
       socialLinks?: string[];
       subtitlePlaceholder?: string;
+      luckyDraw?: string;
       spacePermission?: string;
       messagingPermission?: string;
       boardAccessType?: string;
@@ -183,6 +186,17 @@ export class SpaceEditView implements ViewBuilder {
     if (socialInitialValues?.length === 0) {
       socialInitialValues = undefined;
     }
+
+    const luckyDrawOptions: PlainTextOption[] = [
+      {
+        value: 'DISABLED',
+        text: Element.PlainText('Disabled'),
+      },
+      {
+        value: 'ENABLED',
+        text: Element.PlainText('Enabled'),
+      },
+    ];
 
     const spacePermissionOptions: PlainTextOption[] = Object.values(
       SpacePermissions
@@ -323,6 +337,13 @@ export class SpaceEditView implements ViewBuilder {
           initialValue: initialValues.subtitlePlaceholder,
           blockId: this.blockIds.inputSubtitlePlaceholder,
           optional: true,
+        }),
+        Block.SectionWithSelect({
+          text: '*Lucky draw*',
+          options: luckyDrawOptions,
+          initialOptionValue: initialValues.luckyDraw,
+          blockId: this.blockIds.inputLuckyDraw,
+          actionId: this.actionIds.selectIgnore,
         }),
         Block.Header('Permission Configuration'),
         Block.Divider(),

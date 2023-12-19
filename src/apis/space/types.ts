@@ -34,6 +34,7 @@ export interface Space {
   defaultLanguage: string;
   profileCreateConfig?: SpaceProfileCreateConfig;
   profileCategoryConfig?: SpaceProfileCategoryConfig;
+  profileBackfaceConfig?: SpaceProfileBackfaceConfig;
   boardConfig?: SpaceBoardConfig;
   profileSubtitleType: 'CATEGORY' | 'SUBTITLE' | 'HIDE';
   isAccessLimitedToOnlyCardOwners: boolean;
@@ -140,6 +141,10 @@ export interface SpaceProfileCategoryConfig {
   localizedCategoryLabels: LocalizedText[];
   categoryItems: SpaceProfileCategoryItem[];
   maxItemNumber: number;
+}
+
+export interface SpaceProfileBackfaceConfig {
+  isBackfaceEnabled: boolean;
 }
 
 export interface SpaceProfileCategoryItem {

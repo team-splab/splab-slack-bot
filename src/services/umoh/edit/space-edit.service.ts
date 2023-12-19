@@ -168,6 +168,9 @@ export class SpaceEditService implements SlashCommandService {
             space.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
               ({ language }) => language === space.defaultLanguage
             )?.text,
+          luckyDraw: space.profileBackfaceConfig?.isBackfaceEnabled
+            ? 'ENABLED'
+            : 'DISABLED',
           spacePermission: getSpacePermissionValue(space).value,
           messagingPermission: space.messagingOption,
           boardAccessType: space.boardConfig?.isEnabled
@@ -298,6 +301,10 @@ export class SpaceEditService implements SlashCommandService {
                 ? parseInt(stateValues.inputMaxCategorySelections)
                 : space.profileCategoryConfig?.maxItemNumber || 1,
             },
+      profileBackfaceConfig:
+        stateValues.inputLuckyDraw === 'ENABLED'
+          ? { isBackfaceEnabled: true }
+          : undefined,
       profileSubtitleType:
         localizedSubtitlePlaceholders.length === 0 ? 'CATEGORY' : 'SUBTITLE',
       boardConfig: {
@@ -442,6 +449,17 @@ export class SpaceEditService implements SlashCommandService {
             spaceUpdated.profileCreateConfig?.localizedSubtitlePlaceholders?.find(
               ({ language }) => language === spaceUpdated.defaultLanguage
             )?.text || ''
+          }`,
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `*Lucky draw*\n${
+            spaceUpdated.profileBackfaceConfig?.isBackfaceEnabled
+              ? 'Enabled'
+              : 'Disabled'
           }`,
         },
       },
