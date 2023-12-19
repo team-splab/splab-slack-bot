@@ -5,3 +5,10 @@ export interface SendtimeApiResponse<T> {
   };
   results: T[];
 }
+
+export interface Timezone {
+  id: string;
+  name: string;
+  timezone: string;
+  offset: string;
+}

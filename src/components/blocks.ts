@@ -200,4 +200,15 @@ export const Block = {
     type: 'context',
     elements: texts.map((text) => Element.MarkdownText(text)),
   }),
+  Fields: ({
+    text,
+    fields,
+  }: {
+    text?: string;
+    fields: string[];
+  }): SectionBlock => ({
+    type: 'section',
+    text: Element.MarkdownText(text),
+    fields: fields.map((field) => Element.MarkdownText(field)),
+  }),
 };

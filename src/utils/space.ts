@@ -3,8 +3,10 @@ import {
   LocalizedText,
   SpaceContactPoint,
   SpaceProfileCategoryItem,
+  SpaceSupportedSocial,
 } from '../apis/space/types';
 import { shuffle } from './array';
+import { SpaceProfileLink } from '../apis/space/profile-create/types';
 
 export const getSpaceUrl = (spaceHandle: string) => {
   return process.env.IS_PRODUCTION === 'true'
@@ -76,4 +78,81 @@ export const fillCategoryColorsRandomly = (
     ...item,
     color: colors[index],
   }));
+};
+
+const videoIconId = 'carbon:play-outline';
+const fileIconId = 'carbon:document-attachment';
+const socialToIconIdMap: Record<SpaceSupportedSocial, string> = {
+  LINKEDIN: 'logos:linkedin-icon',
+  INSTAGRAM: 'skill-icons:instagram',
+  TWITTER: 'logos:twitter',
+  NAVER_BLOG: 'custom:naver-blog',
+  FACEBOOK: 'logos:facebook',
+  WEBSITE: 'ant-design:link-outlined',
+  GITHUB: 'logos:github-icon',
+  'COMPANY_VIDEO#1': videoIconId + '#1',
+  'COMPANY_VIDEO#2': videoIconId + '#2',
+  'COMPANY_VIDEO#3': videoIconId + '#3',
+  'COMPANY_VIDEO#4': videoIconId + '#4',
+  'COMPANY_VIDEO#5': videoIconId + '#5',
+  'COMPANY_FILE#1': fileIconId + '#1',
+  'COMPANY_FILE#2': fileIconId + '#2',
+  'COMPANY_FILE#3': fileIconId + '#3',
+  'COMPANY_FILE#4': fileIconId + '#4',
+  'COMPANY_FILE#5': fileIconId + '#5',
+};
+
+export const SpaceSocialUtil = {
+  getSocialLabel: (social: SpaceSupportedSocial): string => {
+    switch (social) {
+      case 'LINKEDIN':
+        return 'LinkedIn';
+      case 'INSTAGRAM':
+        return 'Instagram';
+      case 'TWITTER':
+        return 'Twitter';
+      case 'NAVER_BLOG':
+        return '네이버 블로그';
+      case 'FACEBOOK':
+        return 'Facebook';
+      case 'WEBSITE':
+        return '웹사이트';
+      case 'GITHUB':
+        return 'GitHub';
+      case 'COMPANY_VIDEO#1':
+      case 'COMPANY_VIDEO#2':
+      case 'COMPANY_VIDEO#3':
+      case 'COMPANY_VIDEO#4':
+      case 'COMPANY_VIDEO#5':
+        return '기업소개영상';
+      case 'COMPANY_FILE#1':
+      case 'COMPANY_FILE#2':
+      case 'COMPANY_FILE#3':
+      case 'COMPANY_FILE#4':
+      case 'COMPANY_FILE#5':
+        return '기업소개자료';
+    }
+  },
+  getSocialIconId: (social: SpaceSupportedSocial): string => {
+    return socialToIconIdMap[social];
+  },
+  getProfileLink(
+    social: SpaceSupportedSocial,
+    value: string
+  ): SpaceProfileLink {
+    let url = value;
+    if (!value.startsWith('http') && !value.startsWith('https')) {
+      url = `https://${value}`;
+    }
+    return {
+      url,
+      label: SpaceSocialUtil.getSocialLabel(social),
+      iconId: SpaceSocialUtil.getSocialIconId(social),
+    };
+  },
+  getSocialFromIconId: (iconId: string): SpaceSupportedSocial | undefined => {
+    return Object.entries(socialToIconIdMap).find(
+      ([, value]) => value === iconId
+    )?.[0] as SpaceSupportedSocial;
+  },
 };
