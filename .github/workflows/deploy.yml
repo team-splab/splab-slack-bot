@@ -28,7 +28,7 @@ jobs:
           echo SENDTIME_USER_PW=${{ secrets.SENDTIME_USER_PW }} >> .env
           echo REDIS_URL=${{ secrets.REDIS_URL }} >> .env
           echo GOOGLE_SERVICE_ACCOUNT_EMAIL=${{ secrets.GOOGLE_SERVICE_ACCOUNT_EMAIL }} >> .env
-          echo GOOGLE_SERVICE_ACCOUNT_KEY=${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }} >> .env
+          echo GOOGLE_SERVICE_ACCOUNT_KEY=\"${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}\" >> .env
       - name: Install packages
         run: yarn install --frozen-lockfile
       - name: Build
