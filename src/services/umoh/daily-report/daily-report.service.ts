@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { SlackCommandMiddlewareArgs } from '@slack/bolt';
 import { SLASH_COMMANDS } from '../../../utils/consts';
 import {
@@ -6,13 +5,6 @@ import {
   SlashCommandService,
 } from '../../../interfaces/slash-command-service';
 import { sendtimeApi } from '../../../utils/api';
-
-interface PrivateMetadata {
-  spaceHandle: string;
-  email: string;
-  channel: string;
-  userId: string;
-}
 
 export class DailyReportService implements SlashCommandService {
   readonly slashCommandName = SLASH_COMMANDS.UMOH;
