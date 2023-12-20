@@ -1,36 +1,65 @@
 import axios from 'axios';
 import { SlackCommandMiddlewareArgs } from '@slack/bolt';
+import { SLASH_COMMANDS } from '../../../utils/consts';
+import {
+  SlashCommandArgs,
+  SlashCommandService,
+} from '../../../interfaces/slash-command-service';
+import { sendtimeApi } from '../../../utils/api';
 
-export class DailyReportService {
-  public async sendDailyReport({
+interface PrivateMetadata {
+  spaceHandle: string;
+  email: string;
+  channel: string;
+  userId: string;
+}
+
+export class DailyReportService implements SlashCommandService {
+  readonly slashCommandName = SLASH_COMMANDS.UMOH;
+  readonly slashCommandText = 'daily report';
+
+  async onSlashCommand({
+    logger,
     command,
     ack,
     say,
-  }: SlackCommandMiddlewareArgs) {
+    params: [spaceHandle, email],
+  }: SlashCommandArgs & SlackCommandMiddlewareArgs): Promise<void> {
     console.log(`${new Date()} - Space Daily Report: ${command.text}}`);
     await ack();
 
+    spaceHandle = spaceHandle.replace('@', '');
+
     if (!command.text) {
-      await say(
-        `Please enter Space's handle and your email address. ex) /daily_report handle example@splab.dev`
-      );
+      logger.info(`${new Date()} - command wrong`);
+      await ack({
+        response_type: 'ephemeral',
+        text: `Please enter Space's handle and your email address. ex) /daily_report handle example@splab.dev\``,
+      });
+      return;
     }
 
-    const [handle, email] = command.text.split(' ');
+    logger.info(` ====> ${spaceHandle}, ${email}`);
 
-    axios.get(
-      `${process.env.SENDTIME_API_URL}/v2/admin/space/${handle}/daily`,
-      {
-        params: {
-          email: email,
-        },
-      }
-    );
+    try {
+      sendtimeApi.get(
+        `${process.env.SENDTIME_API_URL}/v2/admin/space/${spaceHandle}/daily`,
+        {
+          params: {
+            email: email,
+          },
+        }
+      );
+    } catch (err) {
+      logger.error(err);
+    }
 
     await say(
-      `Daily Report sent to <@${command.user_id}>'s email <@${
-        command.text.split(' ')[1]
-      }>! ${new Date().toLocaleString()}`
+      `Daily Report sent to <@${
+        command.user_id
+      }>'s email <${email}>! ${new Date().toLocaleString()}`
     );
+
+    await ack({ response_type: 'in_channel' });
   }
 }

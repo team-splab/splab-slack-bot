@@ -50,6 +50,7 @@ const slashCommandServices: SlashCommandService[] = [
   spaceNotiReactionService,
   spaceNotiScrapService,
   spaceCardCreateService,
+  dailyReportService,
 ];
 
 app.event('app_mention', async ({ event, say }) => {
@@ -58,7 +59,6 @@ app.event('app_mention', async ({ event, say }) => {
 });
 
 initUmohServices(
-  dailyReportService,
   slashCommandServices.filter(
     (service) => service.slashCommandName === SLASH_COMMANDS.UMOH
   )
