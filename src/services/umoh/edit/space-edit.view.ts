@@ -395,7 +395,9 @@ export class SpaceEditView implements ViewBuilder {
       };
       blocks.push(
         Block.SectionWithOverflow({
-          text: categoryItem.localizedNames.map(({ text }) => text).join(' | '),
+          text:
+            categoryItem.localizedNames.map(({ text }) => text).join(' | ') ||
+            ' ',
           options: [
             {
               text: ':large_blue_circle: Edit',
