@@ -35,7 +35,7 @@ export const SpacePermissions: Record<string, SpacePermission> = {
     value: 'PRIVATE_APPROVAL_REQUIRED',
     criteria: {
       isAccessLimitedToOnlyCardOwners: true,
-      isFullyPrivate: true,
+      isFullyPrivate: false,
       defaultProfileVisible: false,
     },
   },
